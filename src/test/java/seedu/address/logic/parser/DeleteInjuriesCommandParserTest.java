@@ -14,6 +14,7 @@ import seedu.address.logic.commands.DeleteInjuriesHistoryCommand;
 import seedu.address.logic.commands.EditPersonDescriptor;
 import seedu.address.testutil.EditPersonDescriptorBuilder;
 
+//@@author chuakunhong
 public class DeleteInjuriesCommandParserTest {
 
 
@@ -59,5 +60,5 @@ public class DeleteInjuriesCommandParserTest {
 
         assertParseSuccess(parser, userInput, expectedCommand);
     }
-
+    //@@author
 }

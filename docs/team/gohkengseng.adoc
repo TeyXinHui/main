@@ -13,29 +13,33 @@ The user interacts with it using a CLI, and it has a GUI created with JavaFX. It
 
 == Summary of contributions
 
-* *Major enhancement: Added the ability to create appointments and display it on the UI*
-** What it does: allows the user to manage and keep track of their appointments easily
+* *Major enhancement:* Added the ability to create appointments and display it on the UI.
+** What it does: Allows the user to manage and keep track of their appointments easily.
 ** Justification: This feature improves the product significantly because nowadays, secondary
 school teachers tend to have a rather hectic lifestyle due to added on responsibilities, so this
 feature will help to keep track of any appointments with students in a more organized manner.
-** Credits: External libraries from https://developers.google.com/calendar/v3/reference/[Google Calendar API] was used.
 
-* *Minor enhancement: added a sort command that allows the user to sort the list of students
-based on different parameters*
+* *Minor enhancement:* Added a sort command
+** What it does: Allows the user to sort the list of students based on different parameters.
+** Justification: This feature helps the user to save time by providing a ordered list
+instead of sieving through the list and look at each individual contact.
 
 * *Code contributed*: [https://github.com/CS2103JAN2018-T09-B1/main/blob/master/collated/functional/kengsengg.md[Functional code]] [https://github.com/CS2103JAN2018-T09-B1/main/blob/master/collated/test/kengsengg.md[Test code]]
 
 * *Other contributions*:
 
 ** Project management:
-*** Managed releases on GitHub and code integration
+*** Managed releases, milestones on GitHub and code integration
+*** Kept track of deliverables and deadlines
+
 ** Enhancements to existing features:
+*** Enabled different color schemes for different tags
 
 ** Documentation:
+*** Fixed errors in format of User and Developer Guide
+*** Wrote the Google Calendar FAQ Section
 
-** Community:
-
-** Tools:
+* Credits: External libraries from https://developers.google.com/calendar/v3/reference/[Google Calendar API]
 
 == Contributions to the User Guide
 
@@ -47,6 +51,10 @@ include::../UserGuide.adoc[tag = sort]
 
 include::../UserGuide.adoc[tag = appointment]
 
+include::../UserGuide.adoc[tag = delappointment]
+
+include::../UserGuide.adoc[tag = view]
+
 == Contributions to the Developer Guide
 
 |===
@@ -54,3 +62,5 @@ include::../UserGuide.adoc[tag = appointment]
 |===
 
 include::../DeveloperGuide.adoc[tag = Sorting]
+
+include::../DeveloperGuide.adoc[tag = appt]

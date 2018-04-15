@@ -6,7 +6,7 @@ import static java.util.Objects.requireNonNull;
 import seedu.address.commons.core.EventsCenter;
 import seedu.address.commons.events.ui.ThemeSwitchRequestEvent;
 
-//@@author Johnny Chan
+//@@author johnnychanjx
 /**
  * Changes the EduBuddy colour theme
  */
@@ -44,5 +44,6 @@ public class ChangeThemeCommand extends Command {
                 || (other instanceof ChangeThemeCommand // instanceof handles nulls
                 && themeToChangeTo.equals(((ChangeThemeCommand) other).themeToChangeTo));
     }
+    //@@author
 }
 

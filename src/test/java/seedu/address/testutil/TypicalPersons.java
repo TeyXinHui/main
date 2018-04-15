@@ -20,6 +20,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import seedu.address.model.AddressBook;
+import seedu.address.model.appointment.Appointment;
+import seedu.address.model.appointment.exceptions.DuplicateAppointmentException;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.exceptions.DuplicatePersonException;
 
@@ -27,7 +29,6 @@ import seedu.address.model.person.exceptions.DuplicatePersonException;
  * A utility class containing a list of {@code Person} objects to be used in tests.
  */
 public class TypicalPersons {
-
 
     public static final Person ALICE = new PersonBuilder().withName("Alice Pauline").withNric("S8535525Z")
             .withTags("friends").withSubjects("English A1", "EMath A1", "Hist A1", "HTamil A1", "Chem A1", "Phy A1")
@@ -75,6 +76,18 @@ public class TypicalPersons {
 
     public static final String KEYWORD_MATCHING_MEIER = "Meier"; // A keyword that matches MEIER
 
+    //Appointments
+    public static final Appointment A1 = new Appointment("Alex Yeoh", "Consultation", "04042018",
+            "1200", "1300");
+    public static final Appointment A2 = new Appointment("David Li", "Remedial", "05052018",
+            "1400", "1600");
+    public static final Appointment A3 = new Appointment("Bon", "Remedial", "01052018",
+            "0800", "1000");
+    public static final Appointment A4 = new Appointment("Carl", "Consultation", "18042018",
+            "1400", "1500");
+    public static final Appointment A5 = new Appointment("Emily", "Remedial", "01042018",
+            "0900", "1000");
+
     private TypicalPersons() {} // prevents instantiation
 
     /**
@@ -89,10 +102,21 @@ public class TypicalPersons {
                 throw new AssertionError("not possible");
             }
         }
+        for (Appointment appointment : getTypicalAppointments()) {
+            try {
+                ab.addAppointment(appointment);
+            } catch (DuplicateAppointmentException e) {
+                throw new AssertionError("not possible");
+            }
+        }
         return ab;
     }
 
     public static List<Person> getTypicalPersons() {
         return new ArrayList<>(Arrays.asList(ALICE, BENSON, CARL, DANIEL, ELLE, FIONA, GEORGE));
+    }
+
+    public static List<Appointment> getTypicalAppointments() {
+        return new ArrayList<>(Arrays.asList(A1, A2, A3, A4, A5));
     }
 }

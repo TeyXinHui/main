@@ -10,6 +10,9 @@ import org.junit.Test;
 import seedu.address.commons.events.ui.ThemeSwitchRequestEvent;
 import seedu.address.ui.testutil.EventsCollectorRule;
 
+
+//@@author johnnychanjx
+
 public class ChangeThemeCommandTest {
 
     private static final String VALID_THEME = "light";

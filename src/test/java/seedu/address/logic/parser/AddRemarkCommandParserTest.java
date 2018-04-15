@@ -15,6 +15,7 @@ import seedu.address.logic.commands.AddRemarkCommand;
 import seedu.address.logic.commands.EditPersonDescriptor;
 import seedu.address.testutil.EditPersonDescriptorBuilder;
 
+//@@author chuakunhong
 public class AddRemarkCommandParserTest {
 
 
@@ -60,5 +61,5 @@ public class AddRemarkCommandParserTest {
 
         assertParseSuccess(parser, userInput, expectedCommand);
     }
-
+    //@@author
 }

@@ -30,7 +30,8 @@ import seedu.address.model.tag.Tag;
 /**
  * Adds the details of a nextOfKin to an existing person in the address book.
  */
-//@@author
+//@@author chuakunhong
+
 public class NextOfKinCommand extends UndoableCommand {
 
     public static final String COMMAND_WORD = "nok";

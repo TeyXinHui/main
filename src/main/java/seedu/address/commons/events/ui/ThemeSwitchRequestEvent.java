@@ -3,7 +3,7 @@ package seedu.address.commons.events.ui;
 
 import seedu.address.commons.events.BaseEvent;
 
-//@@author Johnny Chan
+//@@author johnnychanjx
 /**
  * Indicates that a theme switch is called.
  */

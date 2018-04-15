@@ -33,13 +33,13 @@ public class AddAppointmentCommand extends Command {
             + "Example: " + COMMAND_WORD + " "
             + PREFIX_NAME + "Alex Yeoh "
             + PREFIX_INFO + "Consultation "
-            + PREFIX_DATE + "28031998 "
+            + PREFIX_DATE + "28042018 "
             + PREFIX_START_TIME + "1500 "
             + PREFIX_END_TIME + "1600 \n"
             + "Example: " + COMMAND_ALIAS + " "
             + PREFIX_NAME + "Alex Yeoh "
             + PREFIX_INFO + "Consultation "
-            + PREFIX_DATE + "28031998 "
+            + PREFIX_DATE + "28042018 "
             + PREFIX_START_TIME + "1500 "
             + PREFIX_END_TIME + "1600 ";
 

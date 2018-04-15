@@ -26,7 +26,7 @@ public class DeleteAppointmentCommand extends Command {
             + "Example: " + COMMAND_WORD + " 1\n"
             + "Example: " + COMMAND_ALIAS + " 1\n";
 
-    public static final String MESSAGE_SUCCESS = "Appointment removed: %1$s";
+    public static final String MESSAGE_DELETE_APPOINTMENT_SUCCESS = "Appointment removed: %1$s";
 
     private final Index targetIndex;
 
@@ -55,7 +55,7 @@ public class DeleteAppointmentCommand extends Command {
             model.deleteAppointment(toDelete);
             getDetails();
             deleteEventOnCalendar();
-            return new CommandResult(String.format(MESSAGE_SUCCESS, getDetails()));
+            return new CommandResult(String.format(MESSAGE_DELETE_APPOINTMENT_SUCCESS, getDetails()));
         } catch (AppointmentNotFoundException e) {
             throw new AssertionError("The target appointment cannot be missing");
         }

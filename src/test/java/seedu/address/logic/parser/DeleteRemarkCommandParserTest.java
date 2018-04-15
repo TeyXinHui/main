@@ -15,6 +15,7 @@ import seedu.address.logic.commands.DeleteRemarkCommand;
 import seedu.address.logic.commands.EditPersonDescriptor;
 import seedu.address.testutil.EditPersonDescriptorBuilder;
 
+//@@author chuakunhong
 public class DeleteRemarkCommandParserTest {
 
 
@@ -60,5 +61,5 @@ public class DeleteRemarkCommandParserTest {
 
         assertParseSuccess(parser, userInput, expectedCommand);
     }
-
+    //@@author
 }

@@ -12,7 +12,10 @@ public class ViewCommand extends Command {
     public static final String COMMAND_WORD = "view";
 
     public static final String MESSAGE_VIEW_SUCCESS = "Calendar view displayed";
-    public static final String MESSAGE_USAGE = "Shows the Google Calendar page";
+    public static final String MESSAGE_USAGE = COMMAND_WORD
+            + ": Shows the Google Calendar page of the gmail ID keyed in by the user.\n"
+            + "Parameters: GMAIL_ID \n"
+            + "Example: " + COMMAND_WORD + " edubuddytest\n";
 
     private final String parameter;
 
@@ -22,12 +25,8 @@ public class ViewCommand extends Command {
 
     @Override
     public CommandResult execute() {
-        EventsCenter.getInstance().post(new DisplayCalendarRequestEvent());
+        EventsCenter.getInstance().post(new DisplayCalendarRequestEvent(this.parameter));
         return new CommandResult(MESSAGE_VIEW_SUCCESS);
-    }
-
-    public String getParameter() {
-        return this.parameter;
     }
 }
 //@@author

@@ -14,10 +14,8 @@ The user interacts with it using a CLI, and it has a GUI created with JavaFX. It
 == Summary of contributions
 
 * *Major enhancement*: Added commands which manages student's administrative information
-** What it does:
-** Justification:
-** Highlights:
-** Credits:
+** What it does: It allows the teachers to add other details that are required into the student records.
+** Justification: These details are important for the teacher is as teachers are able to better justify a student's performance and would know who to contact to help the student perform better.
 
 * *Minor enhancement*: Enhanced tag command functionalities
 
@@ -28,7 +26,7 @@ The user interacts with it using a CLI, and it has a GUI created with JavaFX. It
 ** Project management:
 
 ** Enhancements to existing features:
-
+*** Extracted out EditPersonDescriptor as a class on it's own as it is shared by many other commands. This is to better edit the commands in the future as we add more commands.
 ** Documentation:
 
 ** Community:
@@ -45,9 +43,11 @@ include::../UserGuide.adoc[tag = tags]
 
 include::../UserGuide.adoc[tag = remarks]
 
+include::../UserGuide.adoc[tag = injuries]
+
 include::../UserGuide.adoc[tag = cca]
 
-include::../UserGuide.adoc[tag = injuries]
+include::../UserGuide.adoc[tag = NextofKin]
 
 == Contributions to the Developer Guide
 
@@ -58,3 +58,11 @@ include::../UserGuide.adoc[tag = injuries]
 include::../DeveloperGuide.adoc[tag = TagReplace]
 
 include::../DeveloperGuide.adoc[tag = remark]
+
+include::../DeveloperGuide.adoc[tag = InjuriesHistory]
+
+include::../DeveloperGuide.adoc[tag = Cca]
+
+include::../DeveloperGuide.adoc[tag = NOK]
+
+

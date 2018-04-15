@@ -14,7 +14,8 @@ image::chuakunhong.png[width="150", align="left"]
 {empty}[https://github.com/chuakunhong[GitHub]] [<<chuakunhong#, Portfolio>>]
 
 Role: Developer +
-Responsibilities: Logic component
+Responsibilities: Administrative Component of Data
+
 
 '''
 
@@ -23,7 +24,7 @@ image::kengsengg.png[width="150", align="left"]
 {empty}[https://github.com/kengsengg[GitHub]] [<<gohkengseng#, Portfolio>>]
 
 Role: Developer +
-Responsibilities: UI component
+Responsibilities: Calendar and Appointment Implementations
 
 '''
 
@@ -32,7 +33,7 @@ image::johnnychanjx.png[width="150", align="left"]
 {empty}[http://github.com/johnnychanjx[GitHub]] [<<johnnychan#, Portfolio>>]
 
 Role: Developer +
-Responsibilities: Storage component
+Responsibilities: UI and Data Access Centralisation
 
 '''
 
@@ -41,6 +42,6 @@ image::TeyXinHui.png[width="150", align="left"]
 {empty}[http://github.com/TeyXinHui[GitHub]] [<<teyxinhui#, Portfolio>>]
 
 Role: Developer +
-Responsibilities: Model component
+Responsibilities: Subject Data and Algorithms
 
 '''

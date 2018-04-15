@@ -28,7 +28,10 @@ public interface Model {
     /** Returns the AddressBook */
     ReadOnlyAddressBook getAddressBook();
 
+    //@@author johnnychanjx
+    /** Deletes the Person's page */
     void deletePage(Person target);
+    //@@author
 
     /** Deletes the given person. */
     void deletePerson(Person target) throws PersonNotFoundException;
@@ -36,7 +39,10 @@ public interface Model {
     /** Adds the given person */
     void addPerson(Person person) throws DuplicatePersonException;
 
+    //@@author johnnychanjx
+    /** Adds the given person's page*/
     void addPage(Person person) throws IOException;
+    //@@author
 
     /** Adds the given appointment */
     void addAppointment(Appointment appointment) throws DuplicateAppointmentException;

@@ -15,8 +15,8 @@ endif::[]
 By: `CS2103JAN2018-T09-B1`      Since: `Mar 2018`      Licence: `MIT`
 
 == Introduction
-Welcome to _EduBuddy_! This application is based on a Command Line Interface(CLI),
-and is designed for secondary school teachers to manage student profiles in
+_EduBuddy_! is an application based on Command Line Interface(CLI),
+and is designed for secondary school teachers to store and manage student records in
 a simple and efficient manner.
 
 This developer guide will help to provide you with a detailed walk-through of _EduBuddy_,
@@ -24,9 +24,11 @@ from the application set up procedure, to the explanation of the features and
 troubleshooting methods.
 
 == Setting up
-This section helps to guide you through the necessary steps to launch our application.
+This section helps to guide you through the necessary steps to launch _EduBuddy_.
 
 === Prerequisites
+
+Please ensure that you have the following softwares beforehand.
 
 . *JDK `1.8.0_60`* or later
 +
@@ -120,8 +122,8 @@ The `.pptx` files used to create diagrams in this document can be found in the l
 
 `Main` has only one class called link:{repoURL}/src/main/java/seedu/address/MainApp.java[`MainApp`]. It is responsible for,
 
-* At app launch: Initializes the components in the correct sequence, and connects them up with each other.
-* At shut down: Shuts down the components and invokes cleanup method where necessary.
+* At app launch: Initializing the components in the correct sequence, and connects them up with each other.
+* At shut down: Shutting down the components and invokes cleanup method where necessary.
 
 <<Design-Commons,*`Commons`*>> represents a collection of classes used by multiple other components. Two of those classes play important roles at the architecture level.
 
@@ -381,7 +383,7 @@ image::UndoRedoActivityDiagram.png[width="650"]
 *_return to <<toc,Table of Contents>>_*
 
 // tag::Sorting[]
-=== Sort feature
+=== Sort Feature
 
 ==== Current Implementation
 
@@ -400,7 +402,7 @@ image::SortCommandSequenceDiagram.png[width="650"]
 . The command executes and calls the `sortPersonList(parameter)` method, which then affects
   the `Model`.
 . After the sorting process has been completed, the result is encapsulated as a
-  `CommandResult` object, which is then passed back to the `Ui` as a message shown
+  `CommandResult` object, which is then passed back to the `UI` as a message shown
   to the user.
 
 Below is an example of how the list looks like before and after the command "sort name"
@@ -426,7 +428,7 @@ image::SortCommandByName.png[width="650"]
 *_return to <<toc,Table of Contents>>_*
 
 // tag::TagReplace[]
-=== TagReplace feature
+=== TagReplace Feature
 
 ==== Current Implementation
 The tag replace is a command that replaces the target tag with the tag that we want.
@@ -512,7 +514,7 @@ As the students are required to take at least 6 subjects, the subjects will be s
 *_return to <<toc,Table of Contents>>_*
 
 // tag::masstagremoval[]
-=== Mass Tag Removal feature
+=== Mass Tag Removal Feature
 ==== Current Implementation
 
 The Mass Tag Removal feature is supported through the suggested Tag Removal feature in the Model Component.
@@ -602,14 +604,6 @@ image::AddSubjectCommandActivityDiagram.png[width="800"]
 
 *_return to <<toc,Table of Contents>>_*
 
-// tag::dataencryption[]
-
-=== [Proposed] Data Encryption
-
-_{Explain here how the data encryption feature will be implemented}_
-
-// end::dataencryption[]
-
 // tag::browserpanel[]
 === Browser Panel Revamp
 
@@ -675,9 +669,8 @@ A new remark component is added to the person model.
 
 This remark feature allows the user to add remarks to the student profile of the specified student.
 
+.Sequence Diagram of AddRemarkCommand
 image::RemarkClassSequenceDiagram.png[width="800"]
-
-Figure 15. Sequence Diagram of AddRemarkCommand
 
 ==== Design Considerations
 ===== Aspect: Implementation of the `Remark` feature
@@ -688,6 +681,52 @@ Figure 15. Sequence Diagram of AddRemarkCommand
 *_return to <<toc,Table of Contents>>_*
 // end::remark[]
 
+// tag::appt[]
+=== AppointmentList Feature
+
+==== Current Implementation
+The appointment list feature allows the user to add and delete appointments, whereby the data are then stored
+locally in the hard disk and also on the Google server.
+
+The figure below shows the Sequence Diagram for the interactions between each component when
+"deleteappt 1" is typed into the CommandBox by the user.
+
+image::deleteapptsequence.png[width="800"]
+
+. Firstly, the user keys in the command `deleteappt 1` and the `UI` takes in the input.
+. In the `Logic` section, the `DeleteAppointmentCommandParser`, reads in the input to check if its valid
+  before returning a valid `DeleteAppointmentCommand` Object.
+. The method `deleteAppointment(apptToDelete)` is then executed in `Model` and eventually, the appointment is
+  removed from the local data file.
+. After the deleting process has been completed, the result is encapsulated as a CommandResult object, which is then passed back to the `UI` as a message shown to the user.
+
+The appointment data is also stored on the Google server with the help of the Google Calendar API.
+Each appointment is created with an unique ID so that they can be identified as separate events
+that are not repeated. This ID is derived from the parameters of the appointment that is to be added.
+After that, the appointment to be created and its unique ID is passed into the `createEvent` method. The
+authorized Google Calendar client service then executes from there, enabling the data to be modified
+on the Google server. This is done in a similar manner for the deletion of appointment as well.
+
+==== Design Considerations
+===== Aspect: Creation of unique ID for each appointment
+* ** Alternative 1 (current choice): ** Unique ID is derived from the parameters of
+the appointment that is to be added or deleted.
+** Pros: A simple method which guarantees that the ID will be the same for the individual
+appointment when it is created and removed.
+** Cons: If future implementations for _EduBuddy_ allows appointment parameters to be edited, then
+this method will not work as the ID will be edited after the appointment has been added. This
+will cause the calendar client service to be unable to find the actual appointment to be deleted later on.
+
+* ** Alternative 2: ** Generate unique ID using random number generator and use a hash map to
+store them, where the key is the number and the value is the appointment
+** Pros: This ensures that the appointment ID will not be modified even if its parameters are edited.
+** Cons: Although the ID is derived by random number generator and the limit can be extended, it may result in wastage
+of memory spaces since the set of keys and values are allocated randomly. Also, there is still a
+slight chance that there will be a hashing collision.
+// end::appt[]
+
+*_return to <<toc,Table of Contents>>_*
+
 // tag::InjuriesHistory[]
 === Injuries History Feature
 ==== Current Implementation
@@ -696,9 +735,8 @@ A new injuries history component is added to the person model.
 
 This injuries history feature allows the user to add injuries history to the student profile of the specified student.
 
-//image::InjuriesHistoryClassSequenceDiagram.png[width="800"]
-
-Figure 15. Sequence Diagram of AddInjuriesCommand
+.Sequence Diagram of AddInjuriesCommand
+image::InjuriesHistoryClassSequenceDiagram.png[width="800"]
 
 ==== Design Considerations
 ===== Aspect: Implementation of the `Injuries History` feature
@@ -717,9 +755,8 @@ A new cca component is added to the person model.
 
 This cca feature allows the user to add cca and the position to the student profile of the specified student.
 
-//image::CcaClassSequenceDiagram.png[width="800"]
-
-Figure 15. Sequence Diagram of CcaCommand
+.Sequence Diagram of CcaCommand
+image::CcaClassSequenceDiagram.png[width="800"]
 
 ==== Design Considerations
 ===== Aspect: Implementation of the `Cca` feature
@@ -738,9 +775,8 @@ A new next of kin component is added to the person model.
 
 This NextOfKin feature allows the user to add the details of the student's next of kin into the student profile of the specified student.
 
-//image::NextOfKinClassSequenceDiagram.png[width="800"]
-
-Figure 15. Sequence Diagram of NextOfKinCommand
+.Sequence Diagram of NextOfKinCommand
+image::NextOfKinClassSequenceDiagram.png[width="800"]
 
 ==== Design Considerations
 ===== Aspect: Implementation of the `NextOfKin` feature
@@ -766,10 +802,22 @@ We are using `java.util.logging` package for logging. The `LogsCenter` class is 
 * `INFO` : Information showing the noteworthy actions by the App
 * `FINE` : Details that is not usually noteworthy but may be useful in debugging e.g. print the actual list instead of just its size
 
+*_return to <<toc,Table of Contents>>_*
+
 [[Implementation-Configuration]]
 === Configuration
 
 Certain properties of the application can be controlled (e.g App name, logging level) through the configuration file (default: `config.json`).
+
+*_return to <<toc,Table of Contents>>_*
+
+// tag::dataencryption[]
+
+=== [Proposed] Data Encryption
+
+_{Explain here how the data encryption feature will be implemented}_
+
+// end::dataencryption[]
 
 *_return to <<toc,Table of Contents>>_*
 
@@ -905,6 +953,7 @@ Suggested path for new programmers:
 
 [[GetStartedProgramming-EachComponent]]
 
+[appendix]
 == Product Scope
 
 *Target user profile*:

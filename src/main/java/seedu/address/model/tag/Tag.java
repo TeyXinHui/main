@@ -51,6 +51,11 @@ public class Tag {
         return '[' + tagName + ']';
     }
 
+    /**
+     * @@author johnnychanjx
+     * Returns tag name without [] for Browser Panel
+     * @return
+     */
     public String tagForBrowser() {
         return tagName;
     }

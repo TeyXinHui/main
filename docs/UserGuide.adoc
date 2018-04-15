@@ -17,13 +17,15 @@ By: `CS2103JAN2018-T09-B1`      Since: `Mar 2018`      Licence: `MIT`
 
 == Introduction
 
-_EduBuddy_ is designed for secondary school teachers who *prefer to use a desktop app to manage student profiles*.
+Welcome to _EduBuddy_! This is a desktop application designed for secondary school teachers *to store and manage student records*.
 More importantly, _EduBuddy_ is *optimized for those who prefer to work with a
-Command Line Interface* (CLI) while still having the benefits of a Graphical User Interface (GUI).
+Command Line Interface(CLI)* while still having the benefits of a Graphical User Interface (GUI).
 If you can type fast, _EduBuddy_ can get your student profile management tasks done faster
-than traditional GUI apps. Interested? Jump to the <<Quick Start>> to get started. Enjoy!
+than traditional GUI apps. Interested? Proceed on to <<Quick Start>> to get started. Enjoy!
 
 == Quick Start
+Not quite sure how to get started? This section helps to guide you through the necessary steps
+to get _EduBuddy_ up and running.
 
 .  Ensure you have Java version `1.8.0_60` or later installed in your Computer.
 +
@@ -32,34 +34,47 @@ Having any Java 8 version is not enough. +
 This app will not work with earlier versions of Java 8.
 +
 .  Download the latest `EduBuddy.jar` link:https://github.com/CS2103JAN2018-T09-B1/main/releases[here].
-.  Copy the file to the folder you want to use as the home folder for _EduBuddy_.
+.  Copy the downloaded jar file to the folder you want to use as the home folder for _EduBuddy_.
 .  Double-click the file to start the app. The GUI should appear in a few seconds.
-.  A EduBuddy folder will be created in your operating system's home directory to facilitate debugging for advanced users.
 
 +
 image::Ui.png[width="800"]
 +
-.  Type the command in the command box and press kbd:[Enter] to execute it. +
-e.g. typing *`help`* and pressing kbd:[Enter] will open the help window.
-.  Some example commands you can try:
+
+[NOTE]
+A EduBuddy folder will be created in your operating system's home directory to facilitate debugging for advanced users.
+
+At this point, _EduBuddy_ should be successfully set up. Here are some example commands that you can try:
 
 * *`list` or `l`* : lists all students
-* **`add` or `a` **`n/John Doe ic/S9315585J t/1A t/20 sub/English B3` : adds a student named `John Doe` to _EduBuddy_
+* *`sort` `name`* : sorts the list of students by name
 * **`delete` or `d`** `3` : deletes the 3rd student shown in the current list
 * *`exit`* : exits the app
 
+
+[IMPORTANT]
+-The person must be re-selected for the information in the profile to be updated!!
+
 .  Refer to <<Features>> for details of each command.
+
+-Type the command in the command box and press kbd:[Enter] to execute it. +
+e.g. typing *`help`* and pressing kbd:[Enter] will open the help window. +
+-Refer to <<Features>> for details of each command.
+
 
 [[Features]]
 == Features
 
+This section provides the information of all the useful and interesting features that _EduBuddy_ has to offer.
+
+Here are the guidelines that you may wish to follow when typing in commands. +
+
 *Command Format*
 
-[NOTE]
-Words in `UPPER_CASE` are the parameters to be supplied by the user e.g. in `add n/NAME`, `NAME` is a parameter which can be used as `add n/John Doe`. +
-Parameters can be in *any order* e.g. if the command specifies `n/NAME ic/S9500186H`, `ic/S9500186H n/NAME` is also acceptable. +
-Items in square brackets are *optional*. e.g `n/NAME [t/CLASS]` can be used as `n/John Doe t/1A` or as `n/John Doe`. +
-Command input is *case insensitive*, e.g `fInD Alex` and `find Alex` works the same. +
+* Words in `UPPER_CASE` are the parameters to be supplied by the user e.g. in `add n/NAME`, `NAME` is a parameter which can be used as `add n/John Doe`. +
+* Parameters can be in *any order* e.g. if the command specifies `n/NAME ic/S9500186H`, `ic/S9500186H n/NAME` is also acceptable. +
+* Items in square brackets are *optional*. e.g `n/NAME [t/CLASS]` can be used as `n/John Doe t/1A` or as `n/John Doe`. +
+* Command input is *case insensitive*, e.g `fInD Alex` and `find Alex` works the same. +
 
 === Viewing help : `help`
 
@@ -106,7 +121,8 @@ Abbreviation Format: `l`
 // tag::sort[]
 === Sorting all students : `sort` [since v1.2]
 
-Sorts the list of all students in _EduBuddy_ according to the given parameter +
+Having trouble sieving through the never ending list of contacts so as to make comparisons?
+Fret not, as this feature helps you to sort the list of all students in _EduBuddy_ according to different parameters. +
 Format: `sort PARAMETER`
 
 [NOTE]
@@ -146,7 +162,8 @@ Edits the name and subjects of the 2nd student to be `Betsy Crower`.
 * `e 1 ic/S9123456A` +
 Edits the NRIC number of the 1st student to be `S9123456A`.
 * `e 2 n/Betsy Crower sub/English A1 Chinese A1` +
-Edits the name and subjects of the 2nd student to be `Betsy Crower`.
+Edits the name and subjects of the 2nd student to be `Betsy Crower`. +
+
 *_return to <<toc,Table of Contents>>_*
 
 // tag::addsubject[]
@@ -220,7 +237,7 @@ Abbreviation Format: `d INDEX`
 
 [NOTE]
 -Deletes the student at the specified `INDEX`. +
--The index refers to the index number shown in the most recent listing.
+-The index refers to the index number shown in the most recent student listing.
 
 [IMPORTANT]
 `INDEX` *must be a positive integer*: 1, 2, 3, ...
@@ -283,10 +300,9 @@ The tag must be a valid tag name that is assigned to at least one student in the
 
 Examples:
 
-* `tagreplace t/Class1A t/Class2A` or `tr t/Class1A t/Class2A` +
-Replaces the 'Class 1A' tag from every student in _EduBuddy_ with 'Class 2A'.
-
 image::TagReplaceCommand.png[width="650"]
+* `tagreplace t/3G t/4G` or `tr t/3G t/4G` +
+Replaces the '3G' tag from every student in _EduBuddy_ with 'Class 4G'.
 // end::tags[]
 
 *_return to <<toc,Table of Contents>>_*
@@ -305,11 +321,11 @@ Format: `addremark INDEX r/REMARK`
 ****
 
 Examples:
+
+image::AddRemarkCommand.png[width="650"]
 * `list` +
 `addremark 3 r/Geo Rep` +
 Adds a remark, Geo Rep, to the 3rd student in EduBuddy.
-
-image::AddRemarkCommand.png[width="650"]
 
 === Deleting a remark : `deleteremark` [since v1.4]
 
@@ -324,6 +340,7 @@ Format: `deleteremark INDEX r/REMARK`
 ****
 
 Examples:
+
 * `list` +
 `deleteremark 3 r/Geo Rep` +
 Deletes the remark, Geo Rep, from the 3rd student in EduBuddy.
@@ -349,15 +366,12 @@ The index *must be a positive integer*: 1, 2, 3, ...
 
 Examples:
 
-image::SelectCommandSuccess.png[width="800"]
-
 * `list` +
 `select 11` +
 Selects the 11th student in _EduBuddy_.
 
-* `find Mary` +
-`s 1` +
-Selects the 1st student in the results of the `find` command.
+image::selectcommand.png[width="800"]
+
 // end::select[]
 
 *_return to <<toc,Table of Contents>>_*
@@ -439,31 +453,96 @@ The `redo` command fails as there are no `undo` commands executed previously.
 *_return to <<toc,Table of Contents>>_*
 
 // tag::appointment[]
-=== Creating an appointment: `appointment` or `appt` [since v1.4]
+=== Creating an appointment: `addappointment` or `addappt` [since v1.4]
 
-Creates an appointment (e.g. setting a consultation time slot with students)
-with the student identified by the index number used
-in the last student listing and displays it on the calendar.
+If you are too busy with work and want to keep track of your schedule,
+this feature will definitely come in handy. It helps to create an appointment
+with the student identified by the index number used in the last student listing.
 
-Format: `appointment INDEX d/DATE s/START_TIME e/END_TIME` +
-Abbreviation Format: `appt INDEX d/DATE s/START_TIME e/END_TIME`
+Format: `addappointment n/NAME i/INFO d/DATE s/START_TIME e/END_TIME` +
+Abbreviation Format: `addappt n/NAME i/INFO d/DATE s/START_TIME e/END_TIME`
+
+[IMPORTANT]
+For first time users of _EduBuddy_, a Google authentication is required so as to sync your
+appointment data with your own Google Calendar. Please refer to <<Google Calendar Authentication>>
+on how to set it up first.
 
 [IMPORTANT]
 -`DATE` should be in *DDMMYYYY* format e.g. 25th Dec 2018 would be 25122018. +
 -`START_TIME` and `END_TIME` should be in *24 hour* format e.g. 3:30p.m. would be 1530. +
--`INDEX` *must be a positive integer*: 1, 2, 3, ...
 
 [NOTE]
-After the appointment is successfully created, right click on the calendar and select
-`Reload page` to see your appointment.
+After the appointment is successfully created, use the `view` command to see it display on
+your Google Calendar page if it is enabled.
 
 Examples:
 
-* `appointment 1 d/01022018 s/1500 e/1600` +
-Creates an appointment with the 1st student on 1st Feb 2018 from 3p.m. to 4p.m.
-* `appt 3 d/20042018 s/0930 e/1100` +
-Creates an appointment with the 3rd student on 20th Apr 2018 from 9:30a.m. to 11a.m.
+* `addappointment` OR `addappt` `n/Bernice Yu i/Consultation d/03042018 s/1500 e/1600` +
+Creates a consultation appointment with Bernice Yu on 3rd Apr 2018 from 3p.m. to 4p.m.
+
+image::addapptcommandsuccess.png[width="650"]
 // end::appointment[]
+*_return to <<toc,Table of Contents>>_*
+
+// tag::delappointment[]
+=== Deleting an appointment: `deleteappointment` or `deleteappt` [since v1.5]
+
+This feature helps you to delete an appointment if
+the appointments are already over or you accidentally added wrong details for the appointment
+
+Format: `deleteappointment INDEX` +
+Abbreviation Format: `deleteappt INDEX`
+
+[IMPORTANT]
+For first time users of _EduBuddy_, a Google authentication is required so as to sync your
+appointment data with your own Google Calendar. Please refer to <<Google Calendar Authentication>>
+on how to set it up first.
+
+[NOTE]
+-Deletes the student at the specified `INDEX`. +
+-The index refers to the index number shown in the most recent appointment listing. +
+-After the appointment is successfully created, use the `view` command to see it display on
+your Google Calendar page if it is enabled.
+
+Examples:
+
+* `deleteappointment` OR `deleteappt` `3` +
+Deletes a consultation appointment with Bernice Yu on 3rd Apr 2018 from 3p.m. to 4p.m.
+
+image::deleteapptcommandsuccess.png[width="650"]
+
+// end::delappointment[]
+*_return to <<toc,Table of Contents>>_*
+
+// tag::view[]
+=== Displaying calendar view: `view` [since v1.5]
+
+If you want to view your own Google Calendar to keep track of your appointments, then this
+is the feature for you.
+
+Format: `view GMAIL_ID` +
+
+[IMPORTANT]
+In order to succesfully view your own Google calendar, `GMAIL_ID` must be from a valid gmail account and
+access to the calendar must be made public. Please refer to <<Setting up Google Calendar Permissions>>
+on how to configure the settings.
+
+Examples:
+
+* `view nusedubuddy` +
+If your gmail account is nusedubuddy@gmail.com, the `GMAIL_ID` will be nusedubuddy
+
+image::viewcommandbefore.png[width="650"]
+The above image displays the calendar with an appointment before its deleted.
+
+image::viewcommandafter.png[width="650"]
+The above image displays the calendar after the appointment is deleted.
+
+[NOTE]
+To refresh the calendar page after an appointment is added or deleted, type in the exact `view`
+command again or right click on the calendar and press `Reload page`
+
+// end::view[]
 *_return to <<toc,Table of Contents>>_*
 
 // tag::stream[]
@@ -504,35 +583,6 @@ Returns the L1B4-A score obtained by the student based on his/her grades.
 
 *_return to <<toc,Table of Contents>>_*
 
-// tag::cca[]
-=== Editing the details of CCA of a student : `cca` [since v1.5]
-edits the CCA details of the student in _EduBuddy_. +
-Format: `cca INDEX cca/CCA pos/POSITION` +
-You will be able to see the success message, +
-`CCA added: CCA: POSITION` +
-`Person: NAME`
-
-[NOTE]
--Adds the CCA details to the student at the specified `INDEX`
-if the student does not have any cca details. +
--Edits the CCA details of the student at the specified `INDEX.` +
--The index refers to the index number shown in the most recent listing.
-
-[IMPORTANT]
-`INDEX` *must be a positive integer*: 1, 2, 3, ...
-
-Examples:
-
-* `list` +
-`cca 2 cca/Basketball pos/Member` +
-Adds the cca details(cca basketball with the position member) to the 2nd student in _EduBuddy_.
-* `find Betsy` +
-`cca 1 cca/Choir pos/Member` +
-Adds the cca details(cca Choir with the position member) to the 1st student in the results of the `find` command.
-
-*_return to <<toc,Table of Contents>>_*
-// tag::cca[]
-
 // tag::injuries[]
 === Adding a injury history to a student : `addinjuries` [since v1.5]
 Adds an injury history to the student of the specified index, in the student records in _EduBuddy_. +
@@ -556,6 +606,16 @@ Adds the injury, dislocated right shoulder to the 2nd student in _EduBuddy_.
 * `find Betsy` +
 `addinjuries 1 injuries/Right Ligament Tear` +
 Adds the injury, right ligament tear to the 1st student in the results of the `find` command.
+
+image::InjuriesBeforeAdd.png[width="800"]
+.Before the command `addinjuries 1 injuries/Right Ligament Tear` was entered.
+
+image::AddInjuriesSuccessMessage.png[width="800"]
+.Success message when the command is entered successfully.
+
+image::InjuriesAfterAdd.png[width="800"]
+
+.After the command is successfully entered.
 
 *_return to <<toc,Table of Contents>>_*
 
@@ -582,16 +642,62 @@ Deletes the injury history,torn ligament from the 2nd student in _EduBuddy_.
 * `find Betsy` +
 `deleteinjuries 1 injuries/Dislocated Shoulder` +
 Deletes the injury history from the 1st student in the results of the `find` command.
+
+.The success message when command is successfully entered.
+image::DeleteInjuriesSuccessMessage.png[width="400"]
+
+.What you should see after the command is successfully executed.
+image::DeleteInjuriesCommand.png[width="800"]
+
 // end::injuries[]
 
 *_return to <<toc,Table of Contents>>_*
+
+// tag::cca[]
+=== Editing the details of CCA of a student : `cca` [since v1.5]
+edits the CCA details of the student in _EduBuddy_. +
+Format: `cca INDEX cca/CCA pos/POSITION` +
+You will be able to see the success message, +
+`CCA added: CCA: POSITION` +
+`Person: NAME`
+
+[NOTE]
+-Adds the CCA details to the student at the specified `INDEX`
+if the student does not have any cca details. +
+-Edits the CCA details of the student at the specified `INDEX.` +
+-The index refers to the index number shown in the most recent listing.
+
+[IMPORTANT]
+`INDEX` *must be a positive integer*: 1, 2, 3, ...
+
+Examples:
+
+* `list` +
+`cca 2 cca/Basketball pos/Member` +
+Adds the cca details(cca basketball with the position member) to the 2nd student in _EduBuddy_.
+* `find Betsy` +
+`cca 1 cca/Choir pos/Member` +
+Adds the cca details(cca Choir with the position member) to the 1st student in the results of the `find` command.
+
+.Before adding CCA to Betsy.
+image::BeforeAddingCca.png[width="800"]
+
+.The success message when command is successfully entered.
+image::AddCcaSuccessMessage.png[width="800"]
+
+.After the command is successfully entered.
+image::AfterAddingCca.png[width="800"]
+// end::cca[]
+
+*_return to <<toc,Table of Contents>>_*
+
 
 // tag::NextofKin[]
 === Editing the details of the next of kin of a student : `nok` [since v1.5]
 Edits a next of kin details of the student in _EduBuddy_. +
 Format: `nok INDEX n/NAME p/PHONE [e/EMAIL] r/RELATIONSHIP` +
 You will be able to see the success message, +
-`Next of Kin: NAME Phone: PHONE Email: EMAIL REMARK: Father` +
+`Next of Kin: NAME Phone: PHONE Email: EMAIL Remark: Father` +
 `Person: NAME`
 
 [NOTE]
@@ -614,10 +720,21 @@ of the 2nd student in _EduBuddy_.
 Edits the next of kin details(name, phone number and relationship)
 of the 1st student in the results of the `find` command.
 
-// tag::NextofKin[]
+.Before adding the next of kin details to Betsy.
+image::BeforeAddingNOK.png[width="400"]
+
+.The success message when command is successfully entered.
+image::AddNOKSuccessMessage.png[width="400"]
+
+.After the command is successfully entered.
+image::AfterAddingNOK.png[width="800"]
+// end::NextofKin[]
+
+*_return to <<toc,Table of Contents>>_*
+
 
 // tag::theme[]
-=== Changing theme of EduBuddy : `theme` [since v1.5]
+=== Changing theme of _EduBuddy_ : `theme` [since v1.5]
 Changes colour theme of  _EduBuddy_ to dark or light theme. +
 Format: `theme colour` +
 You will be able to see the success message, +
@@ -645,6 +762,13 @@ Abbreviation Format: `c`
 
 *_return to <<toc,Table of Contents>>_*
 
+=== Saving the data
+
+EduBuddy data are saved in the hard disk automatically after any command that changes the data. +
+There is no need to save manually.
+
+*_return to <<toc,Table of Contents>>_*
+
 === Exiting the program : `exit`
 
 Exits the program. +
@@ -661,14 +785,6 @@ _{Allows the teachers to key in the levels attained by the student for the vario
 // end::L.E.A.P.S System[]
 *_return to <<toc,Table of Contents>>_*
 
-
-=== Saving the data
-
-EduBuddy data are saved in the hard disk automatically after any command that changes the data. +
-There is no need to save manually.
-
-*_return to <<toc,Table of Contents>>_*
-
 // tag::dataencryption[]
 === Encrypting data files `[coming in v2.0]`
 
@@ -678,6 +794,66 @@ _{explain how the user can enable/disable data encryption}_
 *_return to <<toc,Table of Contents>>_*
 
 == FAQ
+
+// tag::googlecalendar[]
+=== Google Calendar Authentication
+For first time users, when you attempt to add an appointment to _EduBuddy_, you will be redirected
+to a new window or tab in your default web browser, as shown in the diagram below.
+
+image::googlelogin.png[width="650"]
+
+To complete the authentication, you may follow the steps below:
+
+Step 1:Input your gmail ID and password to proceed.
+
+[IMPORTANT]
+If you accidentally closed the pop-up browser at this point, the authentication will terminate and it will cause _EduBuddy_
+to stop responding. Close _EduBuddy_ and restart it again.
+
+[NOTE]
+If you currently do not have a Gmail account, but wish to try our appointment feature, you may use
+the following test account to proceed instead. +
+-Gmail ID: edubuddytest +
+-Gmail PW: edubuddy123
+
+Step 2: After successfully logging in to you Gmail account, you will be prompted access. Click `ALLOW`
+to proceed.
+
+image::googleaccess.png[width="650"]
+
+Step 3: Once that is done, the following message will be displayed at the top left corner
+of your browser page.
+
+image::googlesuccess.png[width="650"]
+
+The authentication is successful and you may close the browser and continue
+with the application.
+
+[NOTE]
+This authentication will only be done once and subsequent execution of _EduBuddy_ will not show the
+prompt again.
+
+*_return to <<toc,Table of Contents>>_*
+
+=== Setting up Google Calendar Permissions
+
+To allow your own Google Calender to be viewed on _EduBuddy_, you may follow these steps:
+
+Step 1: Login to your Google Calendar and click on the `Settings`.
+
+image::googlesettings.png[width="650"]
+
+Step 2: At the left hand side panel, under "Settings for my calendars", click on your own calendar.
+
+image::googlesettings2.png[width="300"]
+
+Step 3: Check the "Make available to public" box
+
+image::googlepermissions.png[width="650"]
+// end::googlecalendar[]
+*_return to <<toc,Table of Contents>>_*
+
+=== Others
 
 *Q*: How do I transfer my data to another Computer? +
 *A*: Install the app in the other computer and overwrite the empty data file it creates with the file that contains the data of your previous EduBuddy folder.
@@ -784,36 +960,33 @@ We will let you know through your `GitHub` account or the email linked to your `
 
 == Command Summary
 
-
 The table below provides a quick summary of all the commands available in EduBuddy.
 
 [width="90%",cols="20%,<22%,<23%,<25%",options="header",]
 |=======================================================================
 |Command |Function |Format |Example
-|*Add* |Adds a student entry |`add n/NAME ic/NRIC t/CLASS t/CLASS_REGISTER sub/SUBJECT_NAME SUBJECT_GRADE` +
+|*Add* |Adds a student entry |`add n/NAME ic/NRIC [t/TAG] [r/REMARK] [sub/SUBJECT_NAME SUBJECT_GRADE...]` +
 OR +
-`a n/NAME ic/NRIC t/CLASS t/CLASS_REGISTER sub/SUBJECT_NAME SUBJECT_GRADE`
-|`add n/James Ho ic/S9500186H t/1A t/20 sub/English A2 EMath A1 Chinese A1 Phy A1 AMath A1 Hist A2` +
+`a n/NAME ic/NRIC [t/TAG] [r/REMARK] [sub/SUBJECT_NAME SUBJECT_GRADE...]`
+|`add n/John Doe ic/S9876543H t/3A r/English Rep sub/English A2 Tamil A2 AMath B3 Phy A1 EMath A2 Hist A2` +
 OR +
-`a n/James Ho ic/S9500186H t/1A t/20 sub/English A2 EMath A1 Chinese A1 Phy A1 AMath A1 Hist A2`
+`a n/John Doe ic/S9876543H t/3A r/English Rep sub/English A2 Tamil A2 AMath B3 Phy A1 EMath A2 Hist A2`
 
-|*Add injuries history* |Adds a injury history to a specified student |`addinjuries INDEX injuries/INJURY` +
+|*AddAppointment* |Adds an appointment |`addappointment n/NAME i/INFO d/DATE s/START_TIME e/END_TIME` +
+OR +
+`addappt n/NAME i/INFO d/DATE s/START_TIME e/END_TIME`
+|`addappointment n/John Doe i/Remedial d/25122018 s/1200 e/1300` +
+OR +
+`addappt n/John Doe i/Remedial d/25122018 s/1200 e/1300`
+
+|*AddInjuries* |Adds a injury history to a specified student |`addinjuries INDEX injuries/INJURY` +
 |`addinjuries 2 injuries/Torn Ligament` +
 
-|*Add subject* |Adds subject(s) to a specified student |`addsub INDEX sub/SUBJECT_NAME SUBJECT_GRADE` +
+|*AddRemark* |Adds a remark to a specific student|`addremark 1 r/REMARK` |addremark 2 r/Hardworking
+
+|*AddSubject* |Adds subject(s) to a specified student |`addsub INDEX sub/SUBJECT_NAME SUBJECT_GRADE` +
 
 |`addsub 2 sub/English A2 EMath A1` +
-
-|*AddRemark* |Adds a remark to a specific student|`addremark 1 r/REMARK` +
-
-|`addremark 2 r/Hardworking` +
-
-|*Appointment* |Creates an appointment |`appointment INDEX d/DATE s/START_TIME e/END_TIME` +
-OR +
-`appt INDEX d/DATE s/START_TIME e/END_TIME`
-|`appointment 1 d/25122018 s/1200 e/1300` +
-OR +
-`appt 1 d/25122018 s/1200 e/1300`
 
 |*Cca* |Edits a student's cca details |`cca INDEX cca/CCA pos/POSITION` +
 |`cca 1 cca/Basketball pos/Member`
@@ -832,15 +1005,21 @@ OR +
 OR +
 `d 3`
 
-|*DeleteRemark* |Deletes a remark from a specific student|`deleteremark INDEX r/REMARK` +
-|`deleteremark 1` `r/Hardworking`
+|*DeleteAppointment* |Deletes an appointment |`deleteappointment INDEX` +
+OR +
+`deleteappt INDEX`
+|`deleteappointment 3` +
+OR +
+`deleteappt 3`
 
 |*DeleteInjuries* |Deletes a injury history from a specific student|`deleteinjuries INDEX injuries/INJURY` +
 |`deleteinjuries 1 injuries/Torn Ligament`
 
-|*Edit* |Edits a student entry |`edit INDEX [n/NAME] [ic/NRIC] [t/CLASS] [t/CLASS_REGISTER] [sub/SUBJECT_NAME SUBJECT_GRADE]` +
+|*DeleteRemark* |Deletes a remark from a specific student|`deleteremark 1 r/REMARK` |`deleteremark 1 r/Hardworking`
+
+|*Edit* |Edits a student entry |`edit INDEX [n/NAME] [ic/NRIC] [t/CLASS] [sub/SUBJECT_NAME SUBJECT_GRADE]` +
 OR +
-`e INDEX [n/NAME] [ic/NRIC] [t/CLASS] [t/CLASS_REGISTER] [sub/SUBJECT_NAME SUBJECT_GRADE]`
+`e INDEX [n/NAME] [ic/NRIC] [t/CLASS] [sub/SUBJECT_NAME SUBJECT_GRADE]`
 |`edit 2 n/James Lee` +
 OR +
 `e 2 n/James Lee`
@@ -910,9 +1089,7 @@ OR +
 OR +
 `tr t/2A t/3A`
 
-
-
-|*Theme* |Changes theme of EduBuddy |`theme COLOR`|`theme dark` |
+|*Theme* |Changes theme of _EduBuddy_ |`theme COLOR`|`theme dark`
 
 |*Undo* |Undo previous command |`undo` +
 OR +
@@ -920,6 +1097,8 @@ OR +
 |`undo` +
 OR +
 `u`
+
+|*View* |Displays calendar view |`view GMAIL_ID` |`view nusedubuddy`
 
 |=======================================================================
 

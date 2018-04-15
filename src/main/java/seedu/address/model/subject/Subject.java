@@ -163,17 +163,17 @@ public class Subject {
     }
     //@@author
 
-    //@@ author Johnny Chan
+    //@@ author johnnychanjx
     public String nameToString() {
         return subjectName;
     }
-    //@@author Johnny Chan
+    //@@author johnnychanjx
     public String gradeToString() {
         return subjectGrade;
     }
 
     /**
-     * @@ author Johnny Chan
+     * @@author johnnychanjx
      * Returns grade in number form for html bar
      */
     public String gradeToPercent() {
@@ -205,5 +205,6 @@ public class Subject {
         String percentString = Integer.toString(percent);
         return percentString;
     }
+    //@@author
 }
 

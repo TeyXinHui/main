@@ -1,34 +1,234 @@
 # TeyXinHui
-###### \java\seedu\address\logic\commands\SelectCommand.java
+###### \java\seedu\address\logic\commands\AddSubjectCommand.java
 ``` java
+/**
+ * Edits the subject details of the student at a specified index.
+ */
+public class AddSubjectCommand extends UndoableCommand {
+    public static final String COMMAND_WORD = "addsub";
+
+    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Adds on the new subjects to the student's "
+            + "subjects identified by the index number used in the last student listing. Duplicate subject input "
+            + "will not alter the original subject in the subject list.\n"
+            + "Parameters: INDEX (must be a positive integer) "
+            + "[" + PREFIX_SUBJECT + "SUBJECT SUBJECT_GRADE...]...\n"
+            + "Example: " + COMMAND_WORD + " 1 sub/Jap A1";
+
+    public static final String MESSAGE_ADD_SUBJECT_SUCCESS = "Edited Person: ";
+    public static final String MESSAGE_NEW_SUBJECTS = ". Updated Subjects: ";
+    public static final String MESSAGE_NOT_EDITED = "At least one field to add must be provided.";
+    public static final String MESSAGE_DUPLICATE_PERSON = "This person already exists in the address book.";
+
+    private final Index index;
+    private final EditPersonDescriptor editPersonDescriptor;
+
+    private Person personToEdit;
+    private Person editedPerson;
+
+    /**
+     * @param index of the person in the filtered person list to edit
+     * @param editPersonDescriptor details to edit the person with
+     */
+    public AddSubjectCommand(Index index, EditPersonDescriptor editPersonDescriptor) {
+        requireNonNull(index);
+        requireNonNull(editPersonDescriptor);
+
+        this.index = index;
+        this.editPersonDescriptor = new EditPersonDescriptor(editPersonDescriptor);
+    }
+
+    @Override
+    public CommandResult executeUndoableCommand() throws CommandException, IOException {
+        StringBuilder result = new StringBuilder();
+        try {
+            model.updatePerson(personToEdit, editedPerson);
+            model.deletePage(personToEdit);
+            model.addPage(editedPerson);
+        } catch (DuplicatePersonException dpe) {
+            throw new CommandException(MESSAGE_DUPLICATE_PERSON);
+        } catch (PersonNotFoundException pnfe) {
+            throw new AssertionError("The target person cannot be missing");
+        }
+        model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
+        return new CommandResult(result.append(MESSAGE_ADD_SUBJECT_SUCCESS).append(editedPerson.getName())
+                .append(MESSAGE_NEW_SUBJECTS).append(editedPerson.getSubjects()).toString());
+    }
+
+    @Override
+    protected void preprocessUndoableCommand() throws CommandException {
+        List<Person> lastShownList = model.getFilteredPersonList();
+
+        if (index.getZeroBased() >= lastShownList.size()) {
+            throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+        }
+
+        personToEdit = lastShownList.get(index.getZeroBased());
+        editedPerson = createEditedPerson(personToEdit, editPersonDescriptor);
+    }
+
+    /**
+     * Creates and returns a {@code Person} with the details of {@code personToEdit}
+     * edited with {@code editPersonDescriptor}.
+     */
+    private static Person createEditedPerson(Person personToEdit, EditPersonDescriptor editPersonDescriptor) {
+        assert personToEdit != null;
+
+        Name updatedName = editPersonDescriptor.getName().orElse(personToEdit.getName());
+        Nric updatedNric = editPersonDescriptor.getNric().orElse(personToEdit.getNric());
+        Set<Tag> updatedTags = editPersonDescriptor.getTags().orElse(personToEdit.getTags());
+        Set<Subject> updatedSubjects = new HashSet<>(personToEdit.getSubjects());
+        Set<Subject> newSubjects = new HashSet<>(editPersonDescriptor.getSubjectsAsSet());
+        checkIfSubjectExists(newSubjects, updatedSubjects);
+        Remark updatedRemark = editPersonDescriptor.getRemark().orElse(personToEdit.getRemark());
+        Cca updatedCca = editPersonDescriptor.getCca().orElse(personToEdit.getCca());
+        InjuriesHistory updatedInjuriesHistory = editPersonDescriptor.getInjuriesHistory()
+                .orElse(personToEdit.getInjuriesHistory());
+        NextOfKin updatedNextOfKin = editPersonDescriptor.getNextOfKin().orElse(personToEdit.getNextOfKin());
+        return new Person(updatedName, updatedNric, updatedTags, updatedSubjects, updatedRemark, updatedCca,
+                updatedInjuriesHistory, updatedNextOfKin);
+    }
+
+    /**
+     * Checks if the new subjects to be added exist in original subject list.
+     * If the subject exists, the subject will not be added to the list. Else, it will be added.
+     */
+    public static void checkIfSubjectExists(Set<Subject> newSubjects, Set<Subject> subjectList) {
+        boolean isPresent = false;
+        for (Subject subToAdd : newSubjects) {
+            for (Subject sub : subjectList) {
+                if (subToAdd.subjectName.equals(sub.subjectName)) {
+                    isPresent = true;
+                }
+            }
+            if (!isPresent) {
+                subjectList.add(subToAdd);
+            }
+            isPresent = false;
+        }
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        // short circuit if same object
+        if (other == this) {
+            return true;
+        }
+
+        // instanceof handles nulls
+        if (!(other instanceof AddSubjectCommand)) {
+            return false;
+        }
+
+        // state check
+        AddSubjectCommand e = (AddSubjectCommand) other;
+        return index.equals(e.index)
+                && editPersonDescriptor.equals(e.editPersonDescriptor)
+                && Objects.equals(personToEdit, e.personToEdit);
+    }
+```
+###### \java\seedu\address\logic\commands\EditPersonDescriptor.java
+``` java
+    /**
+     * Returns an unmodifiable subject set, which throws {@code UnsupportedOperationException}
+     * if modification is attempted.
+     * Returns {@code Optional#empty()} if {@code subjects} is null.
+     */
+    public Set<Subject> getSubjectsAsSet() {
+        return (subjects != null) ? Collections.unmodifiableSet(subjects) : Collections.emptySet();
+    }
+```
+###### \java\seedu\address\logic\commands\StreamCommand.java
+``` java
+/**
+ * Finds student at the specified index and returns a streaming score based on the streaming type provided.
+ */
+public class StreamCommand extends Command {
+
+    public static final String COMMAND_WORD = "stream";
+
+    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Finds student at the specified index given and "
+            + "returns a streaming score based on the streaming type provided.\n"
+            + "Parameters: [INDEX] [STREAMING_TYPE]\n"
+            + "Example: " + COMMAND_WORD + " 1 1";
+
+    public static final String MESSAGE_SELECT_STUDENT_SUCCESS = "Student: %1$s";
+    public static final String MESSAGE_L1R5_SUCCESS = ". L1R5 Score: %1$s";
+    public static final String MESSAGE_L1B4A_SUCCESS = ". L1B4A Score: %1$s";
+    public static final String MESSAGE_L1B4B_SUCCESS = ". L1B4B Score: %1$s";
+    public static final String MESSAGE_L1B4C_SUCCESS = ". L1B4C Score: %1$s";
+    public static final String MESSAGE_L1B4D_SUCCESS = ". L1B4D Score: %1$s";
+
+    private final Index targetIndex;
+    private int type;
+
+    public StreamCommand(Index index, int type) {
+        this.targetIndex = index;
+        this.type = type;
+    }
+
     @Override
     public CommandResult execute() throws CommandException {
-
         List<Person> lastShownList = model.getFilteredPersonList();
+        String message;
 
         if (targetIndex.getZeroBased() >= lastShownList.size()) {
             throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
         }
 
         Person selectedPerson = lastShownList.get(targetIndex.getZeroBased());
-        StringBuilder result = new StringBuilder();
-
-        if (selectedPerson.getSubjects().size() < 6) {
-            throw new CommandException(Messages.MESSAGE_INSUFFICIENT_SUBJECTS);
-        }
-        try {
-            score = selectedPerson.calculateL1R5();
-        } catch (InvalidSubjectCombinationException isce) {
-            return new CommandResult("Please check that you have at least 1 subject in each L1R5 "
-                    + "category.\n"  + "Please use edit to change subjects allocated to student.");
-        }
-
         EventsCenter.getInstance().post(new JumpToListRequestEvent(targetIndex));
-        return new CommandResult(result.append(String.format(MESSAGE_SELECT_PERSON_SUCCESS, selectedPerson.getName()))
-                .append(String.format(MESSAGE_L1R5_SUCCESS, score)).toString());
 
+        message = scoreCalculation(selectedPerson, type);
+        return new CommandResult(message);
     }
 
+    /**
+     * Returns a {@String result} message according to the subject combination
+     * of {@Person selectedPerson} and {@int type}.
+     * @return message to user
+     */
+    public static String scoreCalculation(Person selectedPerson, int type) {
+        StringBuilder result = new StringBuilder();
+        String message = "";
+        int score = 0;
+
+        switch (type) {
+        case(1):
+            score = selectedPerson.calculateL1R5();
+            message = MESSAGE_L1R5_SUCCESS;
+            break;
+        case(2):
+            score = selectedPerson.calculateL1B4A();
+            message = MESSAGE_L1B4A_SUCCESS;
+            break;
+        case(3):
+            score = selectedPerson.calculateL1B4B();
+            message = MESSAGE_L1B4B_SUCCESS;
+            break;
+        case(4):
+            score = selectedPerson.calculateL1B4C();
+            message = MESSAGE_L1B4C_SUCCESS;
+            break;
+        case(5):
+            score = selectedPerson.calculateL1B4D();
+            message = MESSAGE_L1B4D_SUCCESS;
+            break;
+        default:
+            break;
+        }
+        return result.append(String.format(MESSAGE_SELECT_STUDENT_SUCCESS, selectedPerson.getName()))
+                .append(String.format(message, score)).toString();
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return other == this // short circuit if same object
+                || (other instanceof StreamCommand // instanceof handles nulls
+                && this.targetIndex.equals(((StreamCommand) other).targetIndex)
+                && (this.type == (((StreamCommand) other).type))); // state check
+    }
+
+}
 ```
 ###### \java\seedu\address\logic\commands\TagDeleteCommand.java
 ``` java
@@ -83,6 +283,166 @@ public class TagDeleteCommand extends UndoableCommand {
                 || (other instanceof TagDeleteCommand // instanceof handles nulls
                 && this.tagToDelete.equals(((TagDeleteCommand) other).tagToDelete)); // state check
     }
+}
+```
+###### \java\seedu\address\logic\parser\AddSubjectCommandParser.java
+``` java
+/**
+ * Parses input arguments and creates a new AddSubjectCommand object
+ */
+public class AddSubjectCommandParser implements Parser<AddSubjectCommand> {
+
+    /**
+     * Parses the given {@code String} of arguments in the context of the EditSubjectCommand
+     * and returns an EditSubjectCommand object for execution.
+     * @throws ParseException if the user input does not conform the expected format
+     */
+    public AddSubjectCommand parse(String args) throws ParseException {
+        requireNonNull(args);
+        ArgumentMultimap argMultimap =
+                ArgumentTokenizer.tokenize(args, PREFIX_SUBJECT);
+
+        Index index;
+
+        try {
+            index = ParserUtil.parseIndex(argMultimap.getPreamble());
+        } catch (IllegalValueException ive) {
+            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddSubjectCommand.MESSAGE_USAGE));
+        }
+
+        EditPersonDescriptor editPersonDescriptor = new EditPersonDescriptor();
+        try {
+            parseSubjectsForEdit(argMultimap.getAllValues(PREFIX_SUBJECT)).ifPresent(editPersonDescriptor::setSubjects);
+        } catch (IllegalValueException ive) {
+            throw new ParseException(ive.getMessage(), ive);
+        }
+
+        if (!editPersonDescriptor.isAnyFieldEdited()) {
+            throw new ParseException(AddSubjectCommand.MESSAGE_NOT_EDITED);
+        }
+
+        return new AddSubjectCommand(index, editPersonDescriptor);
+    }
+
+    /**
+     * Parses {@code Collection<String> subjects} into a {@code Set<Subject>} if {@code subjects} is non-empty.
+     * If {@code subjects} contain only one element which is an empty string, it will be parsed into a
+     * {@code Set<Subject>} containing zero subjects.
+     */
+    private Optional<Set<Subject>> parseSubjectsForEdit(Collection<String> subjects) throws IllegalValueException {
+        assert subjects != null;
+
+        if (subjects.isEmpty()) {
+            return Optional.empty();
+        }
+        Collection<String> subjectSet = subjects.size() == 1 && subjects.contains("")
+                ? Collections.emptySet() : subjects;
+        return Optional.of(ParserUtil.parseSubjects(subjectSet));
+    }
+```
+###### \java\seedu\address\logic\parser\EditCommandParser.java
+``` java
+    /**
+     * Parses {@code Collection<String> subjects} into a {@code Set<Subject>} if {@code subjects} is non-empty.
+     * If {@code subjects} contain only one element which is an empty string, it will be parsed into a
+     * {@code Set<Subject>} containing zero subjects.
+     */
+    private Optional<Set<Subject>> parseSubjectsForEdit(Collection<String> subjects) throws IllegalValueException {
+        assert subjects != null;
+
+        if (subjects.isEmpty()) {
+            return Optional.empty();
+        }
+        Collection<String> subjectSet = subjects.size() == 1 && subjects.contains("")
+                ? Collections.emptySet() : subjects;
+        return Optional.of(ParserUtil.parseSubjects(subjectSet));
+    }
+```
+###### \java\seedu\address\logic\parser\ParserUtil.java
+``` java
+    /**
+     * Splits a {@code String subjects} into {@code String subjectName} and {@code String subjectGrade}
+     * Parses {@code String subjectName} and {@code String subjectGrade}into a {@code Subject}.
+     * Add {@code Subject} into a {@code Set<Subject> subjectSet}.
+     * @throws IllegalValueException if the given {@code subjects} is invalid
+     */
+    public static void parseSubject(Collection<String> subjects, Set<Subject> subjectSet) throws IllegalValueException {
+        requireNonNull(subjects);
+        String subjectsStr = Iterables.get(subjects, 0);
+        String[] splitSubjectStr = subjectsStr.trim().split("\\s+");
+        Subject subjectToAdd;
+        for (int i = 0; i < splitSubjectStr.length; i++) {
+            String subjectName = splitSubjectStr[i];
+            if (!Subject.isValidSubjectName(subjectName)) {
+                throw new IllegalValueException(Subject.MESSAGE_SUBJECT_NAME_CONSTRAINTS);
+            }
+            i += 1;
+            String subjectGrade;
+            if (i >= splitSubjectStr.length) {
+                throw new IllegalValueException(Subject.MESSAGE_SUBJECT_GRADE_CONSTRAINTS);
+            } else {
+                subjectGrade = splitSubjectStr[i];
+            }
+            if (!Subject.isValidSubjectGrade(subjectGrade)) {
+                throw new IllegalValueException(Subject.MESSAGE_SUBJECT_GRADE_CONSTRAINTS);
+            }
+            subjectToAdd = new Subject(subjectName, subjectGrade);
+            for (Subject s : subjectSet) {
+                if (s.subjectName.equals(subjectToAdd.subjectName)) {
+                    throw new IllegalValueException(Subject.MESSAGE_DUPLICATE_SUBJECT);
+                }
+            }
+            subjectSet.add(new Subject(subjectName, subjectGrade));
+        }
+    }
+
+    /**
+     * Parses {@code Collection<String> subjects} into a {@code Set<Subject}.
+     */
+    public static Set<Subject> parseSubjects(Collection<String> subjects) throws IllegalValueException {
+        requireNonNull(subjects);
+        final Set<Subject> subjectSet = new HashSet<>();
+        if (subjects.size() == 1) {
+            parseSubject(subjects, subjectSet);
+        }
+        return subjectSet;
+    }
+
+```
+###### \java\seedu\address\logic\parser\StreamCommandParser.java
+``` java
+/**
+ * Parses input arguments and creates a new StreamCommand object
+ */
+public class StreamCommandParser implements Parser<StreamCommand> {
+    /**
+     * Parses the given {@code String} of arguments in the context of the FindCommand
+     * and returns an FindCommand object for execution.
+     * @throws ParseException if the user input does not conform the expected format
+     */
+    public StreamCommand parse(String args) throws ParseException {
+        String trimmedArgs = args.trim();
+        Index targetIndex;
+
+        if (trimmedArgs.isEmpty()) {
+            throw new ParseException(
+                    String.format(MESSAGE_INVALID_COMMAND_FORMAT, StreamCommand.MESSAGE_USAGE));
+        }
+
+        String[] nameKeywords = trimmedArgs.split("\\s+");
+        try {
+            targetIndex = ParserUtil.parseIndex(nameKeywords[0]);
+        } catch (IllegalValueException ive) {
+            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, StreamCommand.MESSAGE_USAGE));
+        }
+        if (nameKeywords.length != 2 || !nameKeywords[1].matches("-?\\d+")) {
+            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, StreamCommand.MESSAGE_USAGE));
+        }
+        int type = Integer.parseInt(nameKeywords[1]);
+
+        return new StreamCommand(targetIndex, type);
+    }
+
 }
 ```
 ###### \java\seedu\address\logic\parser\TagDeleteCommandParser.java
@@ -143,7 +503,8 @@ public class TagDeleteCommandParser implements Parser<TagDeleteCommand> {
         Set<Tag> tagList = new HashSet<>(person.getTags());
         if (tagList.remove(tag)) {
             Person newPerson = new Person(person.getName(), person.getNric(), tagList, person.getSubjects(),
-                                        person.getRemark());
+                                        person.getRemark(), person.getCca(), person.getInjuriesHistory(),
+                                        person.getNextOfKin());
             try {
                 updatePerson(person, newPerson);
             } catch (DuplicatePersonException error1) {
@@ -177,25 +538,13 @@ public class TagDeleteCommandParser implements Parser<TagDeleteCommand> {
     }
 
 ```
-###### \java\seedu\address\model\person\exceptions\InvalidSubjectCombinationException.java
-``` java
-/**
- * Signals that the student did not have a valid subject combination entered.
- */
-public class InvalidSubjectCombinationException extends Exception {
-    public InvalidSubjectCombinationException(String message) {
-        super(message);
-    }
-
-}
-```
 ###### \java\seedu\address\model\person\Person.java
 ``` java
     /**
      * Calculates the lowest possible score from the grades of the subjects of the selected person.
      * @return L1R5 score
      */
-    public int calculateL1R5() throws InvalidSubjectCombinationException {
+    public int calculateL1R5() {
         int score = 0;
         Set<Subject> subjects = new HashSet<>(this.getSubjects());
         Set<Subject> subjectsToCheck = new HashSet<>();
@@ -239,7 +588,7 @@ public class InvalidSubjectCombinationException extends Exception {
             }
             // Check that if the student has at least one subject in each L1R5 category, else return error message
             if (checkLowest(subjectsToCheck, subjects) == 10) {
-                throw new InvalidSubjectCombinationException("Subjects taken do not fulfil the L1R5 requirements.");
+                return 0;
             } else {
                 score += checkLowest(subjectsToCheck, subjects);
             }
@@ -248,6 +597,218 @@ public class InvalidSubjectCombinationException extends Exception {
         return score;
     }
 
+```
+###### \java\seedu\address\model\person\Person.java
+``` java
+    /**
+     * Calculates the lowest possible score from the grades of the subjects of the selected person.
+     * @return L1B4-A score
+     */
+    public int calculateL1B4A() {
+        int score = 0;
+        Set<Subject> subjects = new HashSet<>(this.getSubjects());
+        Set<Subject> subjectsToCheck = new HashSet<>();
+        for (int i = 0; i < 5; i++) {
+            for (Subject subject: subjects) {
+                switch (i) {
+                // Check if the subject is a L1 subject
+                case 0:
+                    if (Arrays.asList(Subject.L1_SUBJECT).contains(subject.subjectName)) {
+                        subjectsToCheck.add(subject);
+                    }
+                    break;
+                // Check if the subject is a R1 subject
+                case 1:
+                    if (Arrays.asList(Subject.R1A_SUBJECT).contains(subject.subjectName)) {
+                        subjectsToCheck.add(subject);
+                    }
+                    break;
+                // Check if the subject is a R2 subject
+                case 2:
+                    if (Arrays.asList(Subject.R2A_SUBJECT).contains(subject.subjectName)) {
+                        subjectsToCheck.add(subject);
+                    }
+                    break;
+                // Check if the subject is a R3 or R4 subject
+                case 3:
+                case 4:
+                    if (Arrays.asList(Subject.R3_R4_SUBJECT).contains(subject.subjectName)) {
+                        subjectsToCheck.add(subject);
+                    }
+                    break;
+                default:
+                    break;
+                }
+            }
+            // Check that if the student has at least one subject in each L1R5 category, else return error message
+            if (checkLowest(subjectsToCheck, subjects) == 10) {
+                return 0;
+            } else {
+                score += checkLowest(subjectsToCheck, subjects);
+            }
+            subjectsToCheck.clear();
+        }
+        return score;
+    }
+```
+###### \java\seedu\address\model\person\Person.java
+``` java
+    /**
+     * Calculates the lowest possible score from the grades of the subjects of the selected person.
+     * @return L1B4-B score
+     */
+    public int calculateL1B4B() {
+        int score = 0;
+        Set<Subject> subjects = new HashSet<>(this.getSubjects());
+        Set<Subject> subjectsToCheck = new HashSet<>();
+        for (int i = 0; i < 5; i++) {
+            for (Subject subject: subjects) {
+                switch (i) {
+                // Check if the subject is a L1 subject
+                case 0:
+                    if (Arrays.asList(Subject.L1_SUBJECT).contains(subject.subjectName)) {
+                        subjectsToCheck.add(subject);
+                    }
+                    break;
+                // Check if the subject is a R1 subject
+                case 1:
+                    if (Arrays.asList(Subject.R1BCD_SUBJECT).contains(subject.subjectName)) {
+                        subjectsToCheck.add(subject);
+                    }
+                    break;
+                // Check if the subject is a R2 subject
+                case 2:
+                    if (Arrays.asList(Subject.R2B_SUBJECT).contains(subject.subjectName)) {
+                        subjectsToCheck.add(subject);
+                    }
+                    break;
+                // Check if the subject is a R3 or R4 subject
+                case 3:
+                case 4:
+                    if (Arrays.asList(Subject.R3_R4_SUBJECT).contains(subject.subjectName)) {
+                        subjectsToCheck.add(subject);
+                    }
+                    break;
+                default:
+                    break;
+                }
+            }
+            // Check that if the student has at least one subject in each L1R5 category, else return error message
+            if (checkLowest(subjectsToCheck, subjects) == 10) {
+                return 0;
+            } else {
+                score += checkLowest(subjectsToCheck, subjects);
+            }
+            subjectsToCheck.clear();
+        }
+        return score;
+    }
+```
+###### \java\seedu\address\model\person\Person.java
+``` java
+    /**
+     * Calculates the lowest possible score from the grades of the subjects of the selected person.
+     * @return L1B4-C score
+     */
+    public int calculateL1B4C() {
+        int score = 0;
+        Set<Subject> subjects = new HashSet<>(this.getSubjects());
+        Set<Subject> subjectsToCheck = new HashSet<>();
+        for (int i = 0; i < 5; i++) {
+            for (Subject subject: subjects) {
+                switch (i) {
+                // Check if the subject is a L1 subject
+                case 0:
+                    if (Arrays.asList(Subject.L1_SUBJECT).contains(subject.subjectName)) {
+                        subjectsToCheck.add(subject);
+                    }
+                    break;
+                // Check if the subject is a R1 subject
+                case 1:
+                    if (Arrays.asList(Subject.R1BCD_SUBJECT).contains(subject.subjectName)) {
+                        subjectsToCheck.add(subject);
+                    }
+                    break;
+                // Check if the subject is a R2 subject
+                case 2:
+                    if (Arrays.asList(Subject.R2C_SUBJECT).contains(subject.subjectName)) {
+                        subjectsToCheck.add(subject);
+                    }
+                    break;
+                // Check if the subject is a R3 or R4 subject
+                case 3:
+                case 4:
+                    if (Arrays.asList(Subject.R3_R4_SUBJECT).contains(subject.subjectName)) {
+                        subjectsToCheck.add(subject);
+                    }
+                    break;
+                default:
+                    break;
+                }
+            }
+            // Check that if the student has at least one subject in each L1R5 category, else return 0
+            if (checkLowest(subjectsToCheck, subjects) == 10) {
+                return 0;
+            } else {
+                score += checkLowest(subjectsToCheck, subjects);
+            }
+            subjectsToCheck.clear();
+        }
+        return score;
+    }
+```
+###### \java\seedu\address\model\person\Person.java
+``` java
+    /**
+     * Calculates the lowest possible score from the grades of the subjects of the selected person.
+     * @return L1B4-D score
+     */
+    public int calculateL1B4D() {
+        int score = 0;
+        Set<Subject> subjects = new HashSet<>(this.getSubjects());
+        Set<Subject> subjectsToCheck = new HashSet<>();
+        for (int i = 0; i < 5; i++) {
+            for (Subject subject: subjects) {
+                switch (i) {
+                // Check if the subject is a L1 subject
+                case 0:
+                    if (Arrays.asList(Subject.L1_SUBJECT).contains(subject.subjectName)) {
+                        subjectsToCheck.add(subject);
+                    }
+                    break;
+                // Check if the subject is a R1 subject
+                case 1:
+                    if (Arrays.asList(Subject.R1BCD_SUBJECT).contains(subject.subjectName)) {
+                        subjectsToCheck.add(subject);
+                    }
+                    break;
+                // Check if the subject is a R2 subject
+                case 2:
+                    if (Arrays.asList(Subject.R2D_SUBJECT).contains(subject.subjectName)) {
+                        subjectsToCheck.add(subject);
+                    }
+                    break;
+                // Check if the subject is a R3 or R4 subject
+                case 3:
+                case 4:
+                    if (Arrays.asList(Subject.R3_R4_SUBJECT).contains(subject.subjectName)) {
+                        subjectsToCheck.add(subject);
+                    }
+                    break;
+                default:
+                    break;
+                }
+            }
+            // Check that if the student has at least one subject in each L1R5 category, else return error message
+            if (checkLowest(subjectsToCheck, subjects) == 10) {
+                return 0;
+            } else {
+                score += checkLowest(subjectsToCheck, subjects);
+            }
+            subjectsToCheck.clear();
+        }
+        return score;
+    }
 ```
 ###### \java\seedu\address\model\person\Person.java
 ``` java
@@ -301,6 +862,9 @@ public class Subject {
     public static final String MESSAGE_SUBJECT_GRADE_CONSTRAINTS = "Subject grade should be alphanumeric and should be"
             + " one of the following: \n" + Arrays.deepToString(SUBJECT_GRADE) + ".";
 
+    public static final String MESSAGE_DUPLICATE_SUBJECT = "There should not be duplicate subject(s) assigned "
+            + "to student.";
+
     // Use for the calculation of the L1R5 subjects
     public static final String[] L1_SUBJECT = {"English", "HChi", "HTamil", "HMalay"};
     public static final String[] R1_SUBJECT = {"Hist", "Geog", "Com.Hum",  "ELit", "CLit", "MLit", "TLit", "HArt",
@@ -317,6 +881,19 @@ public class Subject {
                                                   "HArt", "DnT", "Comp", "FnN", "PoA", "Econs", "Drama", "PE",
                                                   "Biz", "Biotech", "Design"};
 
+    // Use for the calculation of the L1B4 subjects (A, B, C, D)
+    public static final String[] R1A_SUBJECT = {"Art", "Biz", "ComHum", "Econs", "Geog", "HArt", "HMusic", "Hist",
+                                                "ELit", "CLit", "MLit", "TLit", "Music"};
+    public static final String[] R1BCD_SUBJECT = {"EMath", "AMath"};
+    public static final String[] R2A_SUBJECT = {"AMath", "Art", "Biz", "Chinese", "ComHum", "DnT", "Design", "Econs",
+                                                "EMath", "FnN", "Geog", "HArt", "HChi", "HMalay", "HTamil", "Hist",
+                                                "ELit", "CLit", "MLit", "TLit", "Malay", "Music", "PoA", "Tamil"};
+    public static final String[] R2B_SUBJECT = {"Art", "Biz", "ComHum", "Econs", "Geog", "HArt", "HMusic", "Hist",
+                                                "ELit", "CLit", "TLit", "MLit", "Music", "PoA"};
+    public static final String[] R2C_SUBJECT = {"Bio", "Biotech", "Chem", "Sci", "DnT", "FnN", "Phy", "Comp"};
+    public static final String[] R2D_SUBJECT = {"Art", "Bio", "Biotech", "Chem", "Sci", "Comp", "DnT", "Design", "FnN",
+                                                "HArt", "Phy", "Sci"};
+    public static final String[] R3_R4_SUBJECT = R4_R5_SUBJECT;
 
     public final String subjectName;
     public final String subjectGrade;
@@ -386,9 +963,6 @@ public class Subject {
 
     @Override
     public boolean equals(Object other) {
-        //return other == this // short circuit if same object
-        //        || (other instanceof Subject // instanceof handles nulls
-        //        && this.subjectName.equals(((Subject) other).subjectName)); // state check
         if (other == null) {
             return false;
         }
@@ -399,12 +973,11 @@ public class Subject {
             return false;
         }
         Subject object = (Subject) other;
-        return this.subjectName == object.subjectName && this.subjectGrade == object.subjectGrade;
+        return (this.subjectName.equals(object.subjectName) && this.subjectGrade.equals(object.subjectGrade));
     }
 
     @Override
     public int hashCode() {
-        //return subjectName.hashCode() && subjectGrade.hashCode();
         int hash = 17;
         hash = 37 * hash + subjectName.hashCode();
         hash = 37 * hash + subjectGrade.hashCode();

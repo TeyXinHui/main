@@ -1,8 +1,114 @@
 # chuakunhong
+###### \java\seedu\address\logic\commands\AddInjuriesHistoryCommand.java
+``` java
+
+/**
+ * Adds the injuries history to an existing person in the address book.
+ */
+public class AddInjuriesHistoryCommand extends UndoableCommand {
+
+    public static final String COMMAND_WORD = "addinjuries";
+
+    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Adds a injuries history to the student that you want. "
+            + "Parameters: INDEX (must be a positive integer) "
+            + PREFIX_INJURIES_HISTORY + "INJURYHISTORY\n"
+            + "Example: " + COMMAND_WORD + " 1 "
+            + PREFIX_INJURIES_HISTORY + "Torn ligament" + "\n";
+
+    public static final String MESSAGE_REMARK_PERSON_SUCCESS = "Injuries History added: %1$s\nPerson: %2$s";
+    public static final String MESSAGE_NOT_EDITED = "At least one field to edit must be provided.";
+    public static final String MESSAGE_DUPLICATE_PERSON = "This person already exists in the address book.";
+
+    private final Index index;
+    private final EditPersonDescriptor editPersonDescriptor;
+
+    private Person personToEdit;
+    private Person editedPerson;
+
+    /**
+     * @param index of the person in the filtered person list to edit
+     * @param editPersonDescriptor details to edit the person with
+     */
+    public AddInjuriesHistoryCommand(Index index, EditPersonDescriptor editPersonDescriptor) {
+        requireNonNull(index);
+        requireNonNull(editPersonDescriptor);
+
+        this.index = index;
+        this.editPersonDescriptor = new EditPersonDescriptor(editPersonDescriptor);
+    }
+
+    @Override
+    public CommandResult executeUndoableCommand() throws CommandException, IOException {
+        try {
+            model.updatePerson(personToEdit, editedPerson);
+            model.deletePage(personToEdit);
+            model.addPage(editedPerson);
+        } catch (DuplicatePersonException dpe) {
+            throw new CommandException(MESSAGE_DUPLICATE_PERSON);
+        } catch (PersonNotFoundException pnfe) {
+            throw new AssertionError("The target person cannot be missing");
+        }
+        model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
+        return new CommandResult(String.format(MESSAGE_REMARK_PERSON_SUCCESS, editPersonDescriptor.getInjuriesHistory()
+                        .get(), personToEdit.getName()));
+    }
+
+    @Override
+    protected void preprocessUndoableCommand() throws CommandException {
+        List<Person> lastShownList = model.getFilteredPersonList();
+
+        if (index.getZeroBased() >= lastShownList.size()) {
+            throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+        }
+
+        personToEdit = lastShownList.get(index.getZeroBased());
+        editedPerson = createEditedPerson(personToEdit, editPersonDescriptor);
+    }
+
+    /**
+     * Creates and returns a {@code Person} with the details of {@code personToEdit}
+     * edited with {@code editPersonDescriptor}.
+     */
+    private static Person createEditedPerson(Person personToEdit, EditPersonDescriptor editPersonDescriptor) {
+        assert personToEdit != null;
+
+        Name updatedName = editPersonDescriptor.getName().orElse(personToEdit.getName());
+        Nric updatedNric = editPersonDescriptor.getNric().orElse(personToEdit.getNric());
+        Set<Tag> updatedTags = editPersonDescriptor.getTags().orElse(personToEdit.getTags());
+        Set<Subject> updatedSubjects = editPersonDescriptor.getSubjects().orElse(personToEdit.getSubjects());
+        Remark updatedRemark = editPersonDescriptor.getRemark().orElse(personToEdit.getRemark());
+        Cca updatedCca = editPersonDescriptor.getCca().orElse(personToEdit.getCca());
+        InjuriesHistory updatedInjuriesHistory = ParserUtil.parseInjuriesHistory(personToEdit
+                .getInjuriesHistory().toString() + "\n" + editPersonDescriptor.getInjuriesHistory().get().toString());
+        NextOfKin updatedNextOfKin = editPersonDescriptor.getNextOfKin().orElse(personToEdit.getNextOfKin());
+
+        return new Person(updatedName, updatedNric, updatedTags, updatedSubjects, updatedRemark, updatedCca,
+                        updatedInjuriesHistory, updatedNextOfKin);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        // short circuit if same object
+        if (other == this) {
+            return true;
+        }
+
+        // instanceof handles nulls
+        if (!(other instanceof AddInjuriesHistoryCommand)) {
+            return false;
+        }
+
+        // state check
+        AddInjuriesHistoryCommand e = (AddInjuriesHistoryCommand) other;
+        return index.equals(e.index)
+                && editPersonDescriptor.equals(e.editPersonDescriptor)
+                && Objects.equals(personToEdit, e.personToEdit);
+    }
+```
 ###### \java\seedu\address\logic\commands\AddRemarkCommand.java
 ``` java
 /**
- * Edits the details of an existing person in the address book.
+ * Adds a remark to an existing person in the address book.
  */
 public class AddRemarkCommand extends UndoableCommand {
 
@@ -33,13 +139,15 @@ public class AddRemarkCommand extends UndoableCommand {
         requireNonNull(editPersonDescriptor);
 
         this.index = index;
-        this.editPersonDescriptor = new EditPersonDescriptor(editPersonDescriptor);
+        this.editPersonDescriptor = editPersonDescriptor;
     }
 
     @Override
-    public CommandResult executeUndoableCommand() throws CommandException {
+    public CommandResult executeUndoableCommand() throws CommandException, IOException {
         try {
             model.updatePerson(personToEdit, editedPerson);
+            model.deletePage(personToEdit);
+            model.addPage(editedPerson);
         } catch (DuplicatePersonException dpe) {
             throw new CommandException(MESSAGE_DUPLICATE_PERSON);
         } catch (PersonNotFoundException pnfe) {
@@ -75,8 +183,13 @@ public class AddRemarkCommand extends UndoableCommand {
         Set<Subject> updatedSubjects = editPersonDescriptor.getSubjects().orElse(personToEdit.getSubjects());
         Remark updatedRemark = parseRemark(((personToEdit.getRemark()).toString() + "\n"
                                             + editPersonDescriptor.getRemark().get().toString()));
+        Cca updatedCca = editPersonDescriptor.getCca().orElse(personToEdit.getCca());
+        InjuriesHistory updatedInjuriesHistory = editPersonDescriptor.getInjuriesHistory()
+                                                .orElse(personToEdit.getInjuriesHistory());
+        NextOfKin updatedNextOfKin = editPersonDescriptor.getNextOfKin().orElse(personToEdit.getNextOfKin());
 
-        return new Person(updatedName, updatedNric, updatedTags, updatedSubjects, updatedRemark);
+        return new Person(updatedName, updatedNric, updatedTags, updatedSubjects, updatedRemark, updatedCca,
+                            updatedInjuriesHistory, updatedNextOfKin);
     }
 
     @Override
@@ -97,125 +210,235 @@ public class AddRemarkCommand extends UndoableCommand {
                 && editPersonDescriptor.equals(e.editPersonDescriptor)
                 && Objects.equals(personToEdit, e.personToEdit);
     }
+```
+###### \java\seedu\address\logic\commands\CcaCommand.java
+``` java
+
+/**
+ * Edits the cca details of an existing person in the address book.
+ */
+public class CcaCommand extends UndoableCommand {
+
+    public static final String COMMAND_WORD = "cca";
+
+    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Adds the CCA and the position "
+            + "to the student that you want. "
+            + "Parameters: INDEX (must be a positive integer) "
+            + PREFIX_CCA + "CCA " + PREFIX_CCA_POSITION + "POSITION\n"
+            + "Example: " + COMMAND_WORD + " 1 "
+            + PREFIX_CCA + "Basketball " + PREFIX_CCA_POSITION + "Member\n";
+
+    public static final String MESSAGE_REMARK_PERSON_SUCCESS = "CCA added: %1$s\nPerson: %2$s";
+    public static final String MESSAGE_NOT_EDITED = "At least one field to edit must be provided.";
+    public static final String MESSAGE_DUPLICATE_PERSON = "This person already exists in the address book.";
+
+    private final Index index;
+    private final EditPersonDescriptor editPersonDescriptor;
+
+    private Person personToEdit;
+    private Person editedPerson;
 
     /**
-     * Stores the details to edit the person with. Each non-empty field value will replace the
-     * corresponding field value of the person.
+     * @param index of the person in the filtered person list to edit
+     * @param editPersonDescriptor details to edit the person with
      */
-    public static class EditPersonDescriptor {
-        private Name name;
-        private Nric nric;
-        private Set<Tag> tags;
-        private Set<Subject>  subjects;
-        private Remark remark;
+    public CcaCommand(Index index, EditPersonDescriptor editPersonDescriptor) {
+        requireNonNull(index);
+        requireNonNull(editPersonDescriptor);
 
-        public EditPersonDescriptor() {}
+        this.index = index;
+        this.editPersonDescriptor = new EditPersonDescriptor(editPersonDescriptor);
+    }
 
-        /**
-         * Copy constructor.
-         * A defensive copy of {@code tags} is used internally.
-         */
-        public EditPersonDescriptor(EditPersonDescriptor toCopy) {
-            setName(toCopy.name);
-            setNric(toCopy.nric);
-            setTags(toCopy.tags);
-            setSubjects(toCopy.subjects);
-            setRemark(toCopy.remark);
+    @Override
+    public CommandResult executeUndoableCommand() throws CommandException, IOException {
+        try {
+            model.updatePerson(personToEdit, editedPerson);
+            model.deletePage(personToEdit);
+            model.addPage(editedPerson);
+        } catch (DuplicatePersonException dpe) {
+            throw new CommandException(MESSAGE_DUPLICATE_PERSON);
+        } catch (PersonNotFoundException pnfe) {
+            throw new AssertionError("The target person cannot be missing");
+        }
+        model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
+        return new CommandResult(String.format(MESSAGE_REMARK_PERSON_SUCCESS, editPersonDescriptor.getCca().get(),
+                personToEdit.getName()));
+    }
+
+    @Override
+    protected void preprocessUndoableCommand() throws CommandException {
+        List<Person> lastShownList = model.getFilteredPersonList();
+
+        if (index.getZeroBased() >= lastShownList.size()) {
+            throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
         }
 
-        /**
-         * Returns true if at least one field is edited.
-         */
-        public boolean isAnyFieldEdited() {
-            return CollectionUtil.isAnyNonNull(this.name, this.nric, this.tags);
+        personToEdit = lastShownList.get(index.getZeroBased());
+        editedPerson = createEditedPerson(personToEdit, editPersonDescriptor);
+    }
+
+    /**
+     * Creates and returns a {@code Person} with the details of {@code personToEdit}
+     * edited with {@code editPersonDescriptor}.
+     */
+    private static Person createEditedPerson(Person personToEdit, EditPersonDescriptor editPersonDescriptor) {
+        assert personToEdit != null;
+
+        Name updatedName = editPersonDescriptor.getName().orElse(personToEdit.getName());
+        Nric updatedNric = editPersonDescriptor.getNric().orElse(personToEdit.getNric());
+        Set<Tag> updatedTags = editPersonDescriptor.getTags().orElse(personToEdit.getTags());
+        Set<Subject> updatedSubjects = editPersonDescriptor.getSubjects().orElse(personToEdit.getSubjects());
+        Remark updatedRemark = editPersonDescriptor.getRemark().orElse(personToEdit.getRemark());
+        Cca updatedCca = editPersonDescriptor.getCca().orElse(personToEdit.getCca());
+        InjuriesHistory updatedInjuriesHistory = editPersonDescriptor.getInjuriesHistory()
+                .orElse(personToEdit.getInjuriesHistory());
+        NextOfKin updatedNextOfKin = editPersonDescriptor.getNextOfKin()
+                .orElse(personToEdit.getNextOfKin());
+
+        return new Person(updatedName, updatedNric, updatedTags, updatedSubjects, updatedRemark, updatedCca,
+                updatedInjuriesHistory, updatedNextOfKin);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        // short circuit if same object
+        if (other == this) {
+            return true;
         }
 
-        public void setName(Name name) {
-            this.name = name;
+        // instanceof handles nulls
+        if (!(other instanceof CcaCommand)) {
+            return false;
         }
 
-        public Optional<Name> getName() {
-            return Optional.ofNullable(name);
+        // state check
+        CcaCommand e = (CcaCommand) other;
+        return index.equals(e.index)
+                && editPersonDescriptor.equals(e.editPersonDescriptor)
+                && Objects.equals(personToEdit, e.personToEdit);
+    }
+
+```
+###### \java\seedu\address\logic\commands\DeleteInjuriesHistoryCommand.java
+``` java
+
+/**
+ * Edits the details of an existing person in the address book.
+ */
+public class DeleteInjuriesHistoryCommand extends UndoableCommand {
+
+    public static final String COMMAND_WORD = "deleteinjuries";
+
+    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Delete injuries history from the "
+            + "student that you want. "
+            + "Parameters: INDEX (must be a positive integer) "
+            + PREFIX_INJURIES_HISTORY + "INJURIES_HISTORY...\n"
+            + "Example: " + COMMAND_WORD + " 1 "
+            + PREFIX_INJURIES_HISTORY + "Torn Ligament" + "\n";
+
+    public static final String MESSAGE_REMARK_PERSON_SUCCESS = "Injuries Deleted: %1$s\nPerson: %2$s";
+    public static final String MESSAGE_NOT_EDITED = "At least one field to edit must be provided.";
+    public static final String MESSAGE_DUPLICATE_PERSON = "This person already exists in the address book.";
+
+    private final Index index;
+    private final EditPersonDescriptor editPersonDescriptor;
+
+    private Person personToEdit;
+    private Person editedPerson;
+
+    /**
+     * @param index of the person in the filtered person list to edit
+     * @param editPersonDescriptor details to edit the person with
+     */
+    public DeleteInjuriesHistoryCommand(Index index, EditPersonDescriptor editPersonDescriptor) {
+        requireNonNull(index);
+        requireNonNull(editPersonDescriptor);
+
+        this.index = index;
+        this.editPersonDescriptor = editPersonDescriptor;
+    }
+
+    @Override
+    public CommandResult executeUndoableCommand() throws CommandException, IOException {
+        try {
+            model.updatePerson(personToEdit, editedPerson);
+            model.deletePage(personToEdit);
+            model.addPage(editedPerson);
+        } catch (DuplicatePersonException dpe) {
+            throw new CommandException(MESSAGE_DUPLICATE_PERSON);
+        } catch (PersonNotFoundException pnfe) {
+            throw new AssertionError("The target person cannot be missing");
+        }
+        model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
+        return new CommandResult(String.format(MESSAGE_REMARK_PERSON_SUCCESS, editPersonDescriptor.getInjuriesHistory()
+                        .get(), personToEdit.getName()));
+    }
+
+    @Override
+    protected void preprocessUndoableCommand() throws CommandException {
+        List<Person> lastShownList = model.getFilteredPersonList();
+
+        if (index.getZeroBased() >= lastShownList.size()) {
+            throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
         }
 
-        public void setNric(Nric nric) {
-            this.nric = nric;
-        }
+        personToEdit = lastShownList.get(index.getZeroBased());
+        editedPerson = createEditedPerson(personToEdit, editPersonDescriptor);
+    }
 
-        public Optional<Nric> getNric() {
-            return Optional.ofNullable(nric);
-        }
+    /**
+     * Creates and returns a {@code Person} with the details of {@code personToEdit}
+     * edited with {@code editPersonDescriptor}.
+     */
+    private static Person createEditedPerson(Person personToEdit, EditPersonDescriptor editPersonDescriptor)
+            throws CommandException {
+        assert personToEdit != null;
 
-        /**
-         * Sets {@code tags} to this object's {@code tags}.
-         * A defensive copy of {@code tags} is used internally.
-         */
-        public void setTags(Set<Tag> tags) {
-            this.tags = (tags != null) ? new HashSet<>(tags) : null;
-        }
-
-        /**
-         * Returns an unmodifiable tag set, which throws {@code UnsupportedOperationException}
-         * if modification is attempted.
-         * Returns {@code Optional#empty()} if {@code tags} is null.
-         */
-        public Optional<Set<Tag>> getTags() {
-            return (tags != null) ? Optional.of(Collections.unmodifiableSet(tags)) : Optional.empty();
-        }
-
-        /**
-         * Sets {@code subjects} to this object's {@code subjects}.
-         * A defensive copy of {@code subjects} is used internally.
-         */
-        public void setSubjects(Set<Subject> subjects) {
-            this.subjects = (subjects != null) ? new HashSet<>(subjects) : null;
-        }
-
-        /**
-         * Sets {@code remarks} to this object's {@code remarks}.
-         * A defensive copy of {@code remarks} is used internally.
-         */
-        public void setRemark(Remark remark) {
-            this.remark = remark;
-        }
-
-        /**
-         * Sets {@code remarks} to this object's {@code remarks}.
-         * A defensive copy of {@code remarks} is used internally.
-         */
-        public Optional<Remark> getRemark() {
-            return Optional.ofNullable(remark);
-        }
-
-        /**
-         * Returns an unmodifiable subject set, which throws {@code UnsupportedOperationException}
-         * if modification is attempted.
-         * Returns {@code Optional#empty()} if {@code subjects} is null.
-         */
-        public Optional<Set<Subject>> getSubjects() {
-            return (subjects != null) ? Optional.of(Collections.unmodifiableSet(subjects)) : Optional.empty();
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            // short circuit if same object
-            if (other == this) {
-                return true;
+        Name updatedName = editPersonDescriptor.getName().orElse(personToEdit.getName());
+        Nric updatedNric = editPersonDescriptor.getNric().orElse(personToEdit.getNric());
+        Set<Tag> updatedTags = editPersonDescriptor.getTags().orElse(personToEdit.getTags());
+        Set<Subject> updatedSubjects = editPersonDescriptor.getSubjects().orElse(personToEdit.getSubjects());
+        Remark updatedRemark = editPersonDescriptor.getRemark().orElse((personToEdit.getRemark()));
+        Cca updatedCca = editPersonDescriptor.getCca().orElse(personToEdit.getCca());
+        String[] injuriesHistoryArray = personToEdit.getInjuriesHistory().toString().split("\n");
+        String updateInjuriesHistory = "";
+        NextOfKin updatedNextOfKin = editPersonDescriptor.getNextOfKin().orElse(personToEdit.getNextOfKin());
+        boolean injuriesHistoryIsFound = false;
+        for (String injuriesHistory : injuriesHistoryArray) {
+            if (!injuriesHistory.contains(editPersonDescriptor.getInjuriesHistory().get().toString())) {
+                updateInjuriesHistory = updateInjuriesHistory + injuriesHistory + "\n";
+            } else {
+                editPersonDescriptor.setInjuriesHistory(parseInjuriesHistory(injuriesHistory));
+                injuriesHistoryIsFound = true;
             }
-
-            // instanceof handles nulls
-            if (!(other instanceof EditPersonDescriptor)) {
-                return false;
-            }
-
-            // state check
-            EditPersonDescriptor e = (EditPersonDescriptor) other;
-
-            return getName().equals(e.getName())
-                    && getNric().equals(e.getNric())
-                    && getTags().equals(e.getTags())
-                    && getSubjects().equals(e.getSubjects());
         }
+        if (injuriesHistoryIsFound) {
+            InjuriesHistory updatedInjuriesHistory = parseInjuriesHistory(updateInjuriesHistory);
+            return new Person(updatedName, updatedNric, updatedTags, updatedSubjects, updatedRemark, updatedCca,
+                    updatedInjuriesHistory, updatedNextOfKin);
+        } else {
+            throw new CommandException("The target injuriesHistory cannot be missing.");
+        }
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        // short circuit if same object
+        if (other == this) {
+            return true;
+        }
+
+        // instanceof handles nulls
+        if (!(other instanceof DeleteInjuriesHistoryCommand)) {
+            return false;
+        }
+
+        // state check
+        DeleteInjuriesHistoryCommand e = (DeleteInjuriesHistoryCommand) other;
+        return index.equals(e.index)
+                && editPersonDescriptor.equals(e.editPersonDescriptor)
+                && Objects.equals(personToEdit, e.personToEdit);
     }
 ```
 ###### \java\seedu\address\logic\commands\DeleteRemarkCommand.java
@@ -256,9 +479,11 @@ public class DeleteRemarkCommand extends UndoableCommand {
     }
 
     @Override
-    public CommandResult executeUndoableCommand() throws CommandException {
+    public CommandResult executeUndoableCommand() throws CommandException, IOException {
         try {
             model.updatePerson(personToEdit, editedPerson);
+            model.deletePage(personToEdit);
+            model.addPage(editedPerson);
         } catch (DuplicatePersonException dpe) {
             throw new CommandException(MESSAGE_DUPLICATE_PERSON);
         } catch (PersonNotFoundException pnfe) {
@@ -285,7 +510,8 @@ public class DeleteRemarkCommand extends UndoableCommand {
      * Creates and returns a {@code Person} with the details of {@code personToEdit}
      * edited with {@code editPersonDescriptor}.
      */
-    private static Person createEditedPerson(Person personToEdit, EditPersonDescriptor editPersonDescriptor) {
+    private static Person createEditedPerson(Person personToEdit, EditPersonDescriptor editPersonDescriptor)
+        throws CommandException {
         assert personToEdit != null;
 
         Name updatedName = editPersonDescriptor.getName().orElse(personToEdit.getName());
@@ -293,18 +519,28 @@ public class DeleteRemarkCommand extends UndoableCommand {
         Set<Tag> updatedTags = editPersonDescriptor.getTags().orElse(personToEdit.getTags());
         Set<Subject> updatedSubjects = editPersonDescriptor.getSubjects().orElse(personToEdit.getSubjects());
         String[] remarkArray = personToEdit.getRemark().toString().split("\n");
-        String updatingRemark = "";
+        String updateRemark = "";
+        NextOfKin updatedNextOfKin = editPersonDescriptor.getNextOfKin().orElse(personToEdit.getNextOfKin());
+        Cca updatedCca = editPersonDescriptor.getCca().orElse(personToEdit.getCca());
+        InjuriesHistory updatedInjuriesHistory = editPersonDescriptor.getInjuriesHistory()
+                .orElse(personToEdit.getInjuriesHistory());
+        boolean remarkIsFound = false;
         for (String remark: remarkArray) {
-            System.out.println(remark + (editPersonDescriptor.getRemark()).get());
             if (!remark.contains(editPersonDescriptor.getRemark().get().toString())) {
-                updatingRemark = updatingRemark + remark + "\n";
+                updateRemark = updateRemark + remark + "\n";
             } else {
                 editPersonDescriptor.setRemark(parseRemark(remark));
+                remarkIsFound = true;
             }
         }
-        Remark updatedRemark = parseRemark(updatingRemark);
+        if (remarkIsFound) {
+            Remark updatedRemark = parseRemark(updateRemark);
 
-        return new Person(updatedName, updatedNric, updatedTags, updatedSubjects, updatedRemark);
+            return new Person(updatedName, updatedNric, updatedTags, updatedSubjects, updatedRemark, updatedCca,
+                    updatedInjuriesHistory, updatedNextOfKin);
+        } else {
+            throw new CommandException("The target remark cannot be missing.");
+        }
     }
 
     @Override
@@ -325,145 +561,29 @@ public class DeleteRemarkCommand extends UndoableCommand {
                 && editPersonDescriptor.equals(e.editPersonDescriptor)
                 && Objects.equals(personToEdit, e.personToEdit);
     }
-
-    /**
-     * Stores the details to edit the person with. Each non-empty field value will replace the
-     * corresponding field value of the person.
-     */
-    public static class EditPersonDescriptor {
-        private Name name;
-        private Nric nric;
-        private Set<Tag> tags;
-        private Set<Subject>  subjects;
-        private Remark remark;
-
-        public EditPersonDescriptor() {}
-
-        /**
-         * Copy constructor.
-         * A defensive copy of {@code tags} is used internally.
-         */
-        public EditPersonDescriptor(EditPersonDescriptor toCopy) {
-            setName(toCopy.name);
-            setNric(toCopy.nric);
-            setTags(toCopy.tags);
-            setSubjects(toCopy.subjects);
-            setRemark(toCopy.remark);
-        }
-
-        /**
-         * Returns true if at least one field is edited.
-         */
-        public boolean isAnyFieldEdited() {
-            return CollectionUtil.isAnyNonNull(this.name, this.nric, this.tags);
-        }
-
-        public void setName(Name name) {
-            this.name = name;
-        }
-
-        public Optional<Name> getName() {
-            return Optional.ofNullable(name);
-        }
-
-        public void setNric(Nric nric) {
-            this.nric = nric;
-        }
-
-        public Optional<Nric> getNric() {
-            return Optional.ofNullable(nric);
-        }
-
-        /**
-         * Sets {@code tags} to this object's {@code tags}.
-         * A defensive copy of {@code tags} is used internally.
-         */
-        public void setTags(Set<Tag> tags) {
-            this.tags = (tags != null) ? new HashSet<>(tags) : null;
-        }
-
-        /**
-         * Returns an unmodifiable tag set, which throws {@code UnsupportedOperationException}
-         * if modification is attempted.
-         * Returns {@code Optional#empty()} if {@code tags} is null.
-         */
-        public Optional<Set<Tag>> getTags() {
-            return (tags != null) ? Optional.of(Collections.unmodifiableSet(tags)) : Optional.empty();
-        }
-
-        /**
-         * Sets {@code subjects} to this object's {@code subjects}.
-         * A defensive copy of {@code subjects} is used internally.
-         */
-        public void setSubjects(Set<Subject> subjects) {
-            this.subjects = (subjects != null) ? new HashSet<>(subjects) : null;
-        }
-
-        /**
-         * Sets {@code remarks} to this object's {@code remarks}.
-         * A defensive copy of {@code remarks} is used internally.
-         */
-        public void setRemark(Remark remark) {
-            this.remark = remark;
-        }
-
-        /**
-         * Sets {@code remarks} to this object's {@code remarks}.
-         * A defensive copy of {@code remarks} is used internally.
-         */
-        public Optional<Remark> getRemark() {
-            return Optional.ofNullable(remark);
-        }
-
-        /**
-         * Returns an unmodifiable subject set, which throws {@code UnsupportedOperationException}
-         * if modification is attempted.
-         * Returns {@code Optional#empty()} if {@code subjects} is null.
-         */
-        public Optional<Set<Subject>> getSubjects() {
-            return (subjects != null) ? Optional.of(Collections.unmodifiableSet(subjects)) : Optional.empty();
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            // short circuit if same object
-            if (other == this) {
-                return true;
-            }
-
-            // instanceof handles nulls
-            if (!(other instanceof EditPersonDescriptor)) {
-                return false;
-            }
-
-            // state check
-            EditPersonDescriptor e = (EditPersonDescriptor) other;
-
-            return getName().equals(e.getName())
-                    && getNric().equals(e.getNric())
-                    && getTags().equals(e.getTags())
-                    && getSubjects().equals(e.getSubjects());
-        }
-    }
 ```
-###### \java\seedu\address\logic\commands\RemarkCommand.java
+###### \java\seedu\address\logic\commands\NextOfKinCommand.java
 ``` java
-/**
- * Edits the details of an existing person in the address book.
- */
-public class RemarkCommand extends UndoableCommand {
 
-    public static final String COMMAND_WORD = "remark";
+public class NextOfKinCommand extends UndoableCommand {
 
-    public static final String MESSAGE_USAGE = COMMAND_WORD + ": You can put anything, even nothing. "
+    public static final String COMMAND_WORD = "nok";
+
+    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Adds the Next of Kin details of the person identified"
+            + " "
+            + "by the index number used in the last person listing. "
+            + "Existing values will be overwritten by the input values.\n"
             + "Parameters: INDEX (must be a positive integer) "
-            + PREFIX_REMARK + "REMARKS...\n"
+            + PREFIX_NAME + "NAME "
+            + PREFIX_PHONE + "PHONE "
+            + "[" + PREFIX_EMAIL + "EMAIL] "
+            + PREFIX_REMARK + "RELATIONSHIP\n"
             + "Example: " + COMMAND_WORD + " 1 "
-            + PREFIX_REMARK + "Need help\n"
-            + "Example: " + COMMAND_WORD + " 1 "
-            + PREFIX_REMARK + "\n";
+            + PREFIX_NAME + "John "
+            + PREFIX_PHONE + "96784213 "
+            + PREFIX_REMARK + "Father";
 
-    public static final String MESSAGE_REMARK_PERSON_SUCCESS = "Remark added: %1$s";
+    public static final String MESSAGE_ADD_NOK_SUCCESS = "Next of Kin: %1$s\nPerson: %2$s";
     public static final String MESSAGE_NOT_EDITED = "At least one field to edit must be provided.";
     public static final String MESSAGE_DUPLICATE_PERSON = "This person already exists in the address book.";
 
@@ -477,7 +597,7 @@ public class RemarkCommand extends UndoableCommand {
      * @param index of the person in the filtered person list to edit
      * @param editPersonDescriptor details to edit the person with
      */
-    public RemarkCommand(Index index, EditPersonDescriptor editPersonDescriptor) {
+    public NextOfKinCommand(Index index, EditPersonDescriptor editPersonDescriptor) {
         requireNonNull(index);
         requireNonNull(editPersonDescriptor);
 
@@ -486,16 +606,19 @@ public class RemarkCommand extends UndoableCommand {
     }
 
     @Override
-    public CommandResult executeUndoableCommand() throws CommandException {
+    public CommandResult executeUndoableCommand() throws CommandException, IOException {
         try {
             model.updatePerson(personToEdit, editedPerson);
+            model.deletePage(personToEdit);
+            model.addPage(editedPerson);
         } catch (DuplicatePersonException dpe) {
             throw new CommandException(MESSAGE_DUPLICATE_PERSON);
         } catch (PersonNotFoundException pnfe) {
             throw new AssertionError("The target person cannot be missing");
         }
         model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
-        return new CommandResult(String.format(MESSAGE_REMARK_PERSON_SUCCESS, editedPerson));
+        return new CommandResult(String.format(MESSAGE_ADD_NOK_SUCCESS, editedPerson.getNextOfKin(),
+                                                editedPerson.getName()));
     }
 
     @Override
@@ -522,8 +645,12 @@ public class RemarkCommand extends UndoableCommand {
         Set<Tag> updatedTags = editPersonDescriptor.getTags().orElse(personToEdit.getTags());
         Set<Subject> updatedSubjects = editPersonDescriptor.getSubjects().orElse(personToEdit.getSubjects());
         Remark updatedRemark = editPersonDescriptor.getRemark().orElse(personToEdit.getRemark());
-
-        return new Person(updatedName, updatedNric, updatedTags, updatedSubjects, updatedRemark);
+        Cca updatedCca = editPersonDescriptor.getCca().orElse(personToEdit.getCca());
+        InjuriesHistory updatedInjuriesHistory = editPersonDescriptor.getInjuriesHistory()
+                .orElse(personToEdit.getInjuriesHistory());
+        NextOfKin updatedNextOfKin = editPersonDescriptor.getNextOfKin().orElse(personToEdit.getNextOfKin());
+        return new Person(updatedName, updatedNric, updatedTags, updatedSubjects, updatedRemark, updatedCca,
+                            updatedInjuriesHistory, updatedNextOfKin);
     }
 
     @Override
@@ -534,130 +661,16 @@ public class RemarkCommand extends UndoableCommand {
         }
 
         // instanceof handles nulls
-        if (!(other instanceof RemarkCommand)) {
+        if (!(other instanceof NextOfKinCommand)) {
             return false;
         }
 
         // state check
-        RemarkCommand e = (RemarkCommand) other;
+        NextOfKinCommand e = (NextOfKinCommand) other;
         return index.equals(e.index)
                 && editPersonDescriptor.equals(e.editPersonDescriptor)
                 && Objects.equals(personToEdit, e.personToEdit);
     }
-
-    /**
-     * Stores the details to edit the person with. Each non-empty field value will replace the
-     * corresponding field value of the person.
-     */
-    public static class EditPersonDescriptor {
-        private Name name;
-        private Nric nric;
-        private Set<Tag> tags;
-        private Set<Subject>  subjects;
-        private Remark remark;
-
-        public EditPersonDescriptor() {}
-
-        /**
-         * Copy constructor.
-         * A defensive copy of {@code tags} is used internally.
-         */
-
-        public EditPersonDescriptor(EditPersonDescriptor toCopy) {
-            setName(toCopy.name);
-            setNric(toCopy.nric);
-            setTags(toCopy.tags);
-            setSubjects(toCopy.subjects);
-            setRemark(toCopy.remark);
-        }
-
-        /**
-         * Returns true if at least one field is edited.
-         */
-        public boolean isAnyFieldEdited() {
-            return CollectionUtil.isAnyNonNull(this.name, this.nric, this.tags);
-        }
-
-        public void setName(Name name) {
-            this.name = name;
-        }
-
-        public Optional<Name> getName() {
-            return Optional.ofNullable(name);
-        }
-
-        public void setNric(Nric nric) {
-            this.nric = nric;
-        }
-
-        public Optional<Nric> getNric() {
-            return Optional.ofNullable(nric);
-        }
-
-        /**
-         * Sets {@code tags} to this object's {@code tags}.
-         * A defensive copy of {@code tags} is used internally.
-         */
-        public void setTags(Set<Tag> tags) {
-            this.tags = (tags != null) ? new HashSet<>(tags) : null;
-        }
-
-        /**
-         * Returns an unmodifiable tag set, which throws {@code UnsupportedOperationException}
-         * if modification is attempted.
-         * Returns {@code Optional#empty()} if {@code tags} is null.
-         */
-        public Optional<Set<Tag>> getTags() {
-            return (tags != null) ? Optional.of(Collections.unmodifiableSet(tags)) : Optional.empty();
-        }
-
-        /**
-         * Sets {@code subjects} to this object's {@code subjects}.
-         * A defensive copy of {@code subjects} is used internally.
-         */
-        public void setSubjects(Set<Subject> subjects) {
-            this.subjects = (subjects != null) ? new HashSet<>(subjects) : null;
-        }
-
-        public void setRemark(Remark remark) {
-            this.remark = remark;
-        }
-
-        public Optional<Remark> getRemark() {
-            return Optional.ofNullable(remark);
-        }
-
-        /**
-         * Returns an unmodifiable subject set, which throws {@code UnsupportedOperationException}
-         * if modification is attempted.
-         * Returns {@code Optional#empty()} if {@code subjects} is null.
-         */
-        public Optional<Set<Subject>> getSubjects() {
-            return (subjects != null) ? Optional.of(Collections.unmodifiableSet(subjects)) : Optional.empty();
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            // short circuit if same object
-            if (other == this) {
-                return true;
-            }
-
-            // instanceof handles nulls
-            if (!(other instanceof EditPersonDescriptor)) {
-                return false;
-            }
-
-            // state check
-            EditPersonDescriptor e = (EditPersonDescriptor) other;
-
-            return getName().equals(e.getName())
-                    && getNric().equals(e.getNric())
-                    && getTags().equals(e.getTags())
-                    && getSubjects().equals(e.getSubjects());
-        }
-    }
-}
 ```
 ###### \java\seedu\address\logic\commands\TagReplaceCommand.java
 ``` java
@@ -706,6 +719,47 @@ public class TagReplaceCommand extends UndoableCommand {
     }
 }
 ```
+###### \java\seedu\address\logic\parser\AddInjuriesHistoryCommandParser.java
+``` java
+
+/**
+ * Parses input arguments and creates a new EditCommand object
+ */
+public class AddInjuriesHistoryCommandParser implements Parser<AddInjuriesHistoryCommand> {
+
+    /**
+     * Parses the given {@code String} of arguments in the context of the EditCommand
+     * and returns an EditCommand object for execution.
+     * @throws ParseException if the user input does not conform the expected format
+     */
+    public AddInjuriesHistoryCommand parse(String args) throws ParseException {
+        requireNonNull(args);
+        ArgumentMultimap argMultimap = ArgumentTokenizer.tokenize(args, PREFIX_INJURIES_HISTORY);
+
+        if (!argMultimap.arePrefixesPresent(PREFIX_INJURIES_HISTORY)) {
+            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT,
+                                    AddInjuriesHistoryCommand.MESSAGE_USAGE));
+        }
+        Index index;
+
+        try {
+            index = ParserUtil.parseIndex(argMultimap.getPreamble());
+        } catch (IllegalValueException ive) {
+            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT,
+                                    AddInjuriesHistoryCommand.MESSAGE_USAGE));
+        }
+
+        EditPersonDescriptor editPersonDescriptor = new EditPersonDescriptor();
+        if (ParserUtil.parseInjuriesHistory(argMultimap.getValue(PREFIX_INJURIES_HISTORY)).get().toString().isEmpty()) {
+            throw new ParseException((String.format(MESSAGE_INVALID_COMMAND_FORMAT,
+                                        AddInjuriesHistoryCommand.MESSAGE_USAGE)));
+        } else {
+            ParserUtil.parseInjuriesHistory(argMultimap.getValue(PREFIX_INJURIES_HISTORY))
+                    .ifPresent(editPersonDescriptor::setInjuriesHistory);
+        }
+        return new AddInjuriesHistoryCommand(index, editPersonDescriptor);
+    }
+```
 ###### \java\seedu\address\logic\parser\AddRemarkCommandParser.java
 ``` java
 /**
@@ -722,7 +776,7 @@ public class AddRemarkCommandParser implements Parser<AddRemarkCommand> {
         requireNonNull(args);
         ArgumentMultimap argMultimap = ArgumentTokenizer.tokenize(args, PREFIX_REMARK);
 
-        if (!arePrefixesPresent(argMultimap, PREFIX_REMARK)) {
+        if (!argMultimap.arePrefixesPresent(PREFIX_REMARK)) {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddRemarkCommand.MESSAGE_USAGE));
         }
         Index index;
@@ -741,9 +795,95 @@ public class AddRemarkCommandParser implements Parser<AddRemarkCommand> {
         }
         return new AddRemarkCommand(index, editPersonDescriptor);
     }
+```
+###### \java\seedu\address\logic\parser\ArgumentMultimap.java
+``` java
+    /**
+     * Returns true if none of the prefixes contains empty {@code Optional} values in the given
+     * {@code ArgumentMultimap}.
+     */
+    public boolean arePrefixesPresent(Prefix... prefixes) {
+        return Stream.of(prefixes).allMatch(prefix -> this.getValue(prefix).isPresent());
+    }
+```
+###### \java\seedu\address\logic\parser\CcaCommandParser.java
+``` java
 
-    private static boolean arePrefixesPresent(ArgumentMultimap argumentMultimap, Prefix... prefixes) {
-        return Stream.of(prefixes).allMatch(prefix -> argumentMultimap.getValue(prefix).isPresent());
+/**
+ * Parses input arguments and creates a new EditCommand object
+ */
+public class CcaCommandParser implements Parser<CcaCommand> {
+
+    /**
+     * Parses the given {@code String} of arguments in the context of the EditCommand
+     * and returns an EditCommand object for execution.
+     * @throws ParseException if the user input does not conform the expected format
+     */
+    public CcaCommand parse(String args) throws ParseException {
+        requireNonNull(args);
+        ArgumentMultimap argMultimap = ArgumentTokenizer.tokenize(args, PREFIX_CCA, PREFIX_CCA_POSITION);
+
+        if (!argMultimap.arePrefixesPresent(PREFIX_CCA, PREFIX_CCA_POSITION)) {
+            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, CcaCommand.MESSAGE_USAGE));
+        }
+        Index index;
+
+        try {
+            index = ParserUtil.parseIndex(argMultimap.getPreamble());
+        } catch (IllegalValueException ive) {
+            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, CcaCommand.MESSAGE_USAGE));
+        }
+
+        EditPersonDescriptor editPersonDescriptor = new EditPersonDescriptor();
+        if (argMultimap.getValue(PREFIX_CCA).get().isEmpty()
+                || argMultimap.getValue(PREFIX_CCA_POSITION).get().isEmpty()) {
+            throw new ParseException((String.format(MESSAGE_INVALID_COMMAND_FORMAT, CcaCommand.MESSAGE_USAGE)));
+        } else {
+            ParserUtil.parseCca(argMultimap.getValue(PREFIX_CCA), argMultimap.getValue(PREFIX_CCA_POSITION))
+                    .ifPresent(editPersonDescriptor::setCca);
+        }
+        return new CcaCommand(index, editPersonDescriptor);
+    }
+```
+###### \java\seedu\address\logic\parser\DeleteInjuriesHistoryCommandParser.java
+``` java
+
+/**
+ * Parses input arguments and creates a new EditCommand object
+ */
+public class DeleteInjuriesHistoryCommandParser implements Parser<DeleteInjuriesHistoryCommand> {
+
+    /**
+     * Parses the given {@code String} of arguments in the context of the EditCommand
+     * and returns an EditCommand object for execution.
+     * @throws ParseException if the user input does not conform the expected format
+     */
+    public DeleteInjuriesHistoryCommand parse(String args) throws ParseException {
+        requireNonNull(args);
+        ArgumentMultimap argMultimap = ArgumentTokenizer.tokenize(args, PREFIX_INJURIES_HISTORY);
+
+        if (!argMultimap.arePrefixesPresent(PREFIX_INJURIES_HISTORY)) {
+            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT,
+                                    DeleteInjuriesHistoryCommand.MESSAGE_USAGE));
+        }
+        Index index;
+
+        try {
+            index = ParserUtil.parseIndex(argMultimap.getPreamble());
+        } catch (IllegalValueException ive) {
+            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT,
+                                    DeleteInjuriesHistoryCommand.MESSAGE_USAGE));
+        }
+
+        EditPersonDescriptor editPersonDescriptor = new EditPersonDescriptor();
+        if (ParserUtil.parseInjuriesHistory(argMultimap.getValue(PREFIX_INJURIES_HISTORY)).get().toString().isEmpty()) {
+            throw new ParseException((String.format(MESSAGE_INVALID_COMMAND_FORMAT,
+                                                    DeleteInjuriesHistoryCommand.MESSAGE_USAGE)));
+        } else {
+            ParserUtil.parseInjuriesHistory(argMultimap.getValue(PREFIX_INJURIES_HISTORY))
+                    .ifPresent(editPersonDescriptor::setInjuriesHistory);
+        }
+        return new DeleteInjuriesHistoryCommand(index, editPersonDescriptor);
     }
 ```
 ###### \java\seedu\address\logic\parser\DeleteRemarkCommandParser.java
@@ -762,7 +902,7 @@ public class DeleteRemarkCommandParser implements Parser<DeleteRemarkCommand> {
         requireNonNull(args);
         ArgumentMultimap argMultimap = ArgumentTokenizer.tokenize(args, PREFIX_REMARK);
 
-        if (!arePrefixesPresent(argMultimap, PREFIX_REMARK)) {
+        if (!argMultimap.arePrefixesPresent(PREFIX_REMARK)) {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, DeleteRemarkCommand.MESSAGE_USAGE));
         }
         Index index;
@@ -782,48 +922,96 @@ public class DeleteRemarkCommandParser implements Parser<DeleteRemarkCommand> {
         }
         return new DeleteRemarkCommand(index, editPersonDescriptor);
     }
-
-    private static boolean arePrefixesPresent(ArgumentMultimap argumentMultimap, Prefix... prefixes) {
-        return Stream.of(prefixes).allMatch(prefix -> argumentMultimap.getValue(prefix).isPresent());
-    }
 ```
-###### \java\seedu\address\logic\parser\RemarkCommandParser.java
+###### \java\seedu\address\logic\parser\NextOfKinCommandParser.java
 ``` java
-/**
- * Parses input arguments and creates a new RemarkCommand object
- */
-public class RemarkCommandParser implements Parser<RemarkCommand> {
+public class NextOfKinCommandParser implements Parser<NextOfKinCommand> {
 
     /**
-     * Parses the given {@code String} of arguments in the context of the RemarkCommand
-     * and returns an RemarkCommand object for execution.
+     * Parses the given {@code String} of arguments in the context of the EditCommand
+     * and returns an EditCommand object for execution.
      * @throws ParseException if the user input does not conform the expected format
      */
-    public RemarkCommand parse(String args) throws ParseException {
+    public NextOfKinCommand parse(String args) throws ParseException {
         requireNonNull(args);
-        ArgumentMultimap argMultimap = ArgumentTokenizer.tokenize(args, PREFIX_REMARK);
+        ArgumentMultimap argMultimap =
+                ArgumentTokenizer.tokenize(args, PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_REMARK);
 
-        if (!arePrefixesPresent(argMultimap, PREFIX_REMARK)) {
-            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, RemarkCommand.MESSAGE_USAGE));
-        }
         Index index;
 
         try {
             index = ParserUtil.parseIndex(argMultimap.getPreamble());
         } catch (IllegalValueException ive) {
-            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, RemarkCommand.MESSAGE_USAGE));
+            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, NextOfKinCommand.MESSAGE_USAGE));
         }
 
         EditPersonDescriptor editPersonDescriptor = new EditPersonDescriptor();
-        ParserUtil.parseRemark(argMultimap.getValue(PREFIX_REMARK)).ifPresent(editPersonDescriptor::setRemark);
+        if (!(argMultimap.arePrefixesPresent(PREFIX_NAME, PREFIX_PHONE, PREFIX_REMARK))) {
+            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, NextOfKinCommand.MESSAGE_USAGE));
+        }
+        try {
+            ParserUtil.parseNextOfKin(argMultimap.getValue(PREFIX_NAME),
+                        argMultimap.getValue(PREFIX_PHONE),
+                        argMultimap.getValue(PREFIX_EMAIL),
+                        argMultimap.getValue(PREFIX_REMARK)).ifPresent(editPersonDescriptor::setNextOfKin);
 
-        return new RemarkCommand(index, editPersonDescriptor);
+        } catch (IllegalValueException ive) {
+            throw new ParseException(ive.getMessage(), ive);
+        }
+
+        if (argMultimap.getValue(PREFIX_NAME).get().isEmpty() && argMultimap.getValue(PREFIX_PHONE).get().isEmpty()
+                && argMultimap.getValue(PREFIX_NAME).get().isEmpty()) {
+            throw new ParseException(NextOfKinCommand.MESSAGE_NOT_EDITED);
+        }
+
+        if (!isValidName(argMultimap.getValue(PREFIX_NAME).get())) {
+            throw new ParseException(MESSAGE_NAME_CONSTRAINTS);
+        }
+
+        if (!isValidPhone(argMultimap.getValue(PREFIX_PHONE).get())) {
+            throw new ParseException(MESSAGE_PHONE_CONSTRAINTS);
+        }
+
+        if (argMultimap.getValue(PREFIX_EMAIL).isPresent()) {
+            if (!isValidEmail(argMultimap.getValue(PREFIX_EMAIL).get())) {
+                throw new ParseException(MESSAGE_EMAIL_CONSTRAINTS);
+            }
+        }
+
+        if (!isValidRemark(argMultimap.getValue(PREFIX_REMARK).get())) {
+            throw new ParseException(MESSAGE_REMARK_CONSTRAINTS);
+        }
+
+
+        return new NextOfKinCommand(index, editPersonDescriptor);
+    }
+```
+###### \java\seedu\address\logic\parser\ParserUtil.java
+``` java
+    /**
+     * Parses a {@code String nric} into a {@code Nric}.
+     * Leading and trailing whitespaces will be trimmed.
+     *
+     * @throws IllegalValueException if the given {@code nric} is invalid.
+     */
+    public static Nric parseNric(String nric) throws IllegalValueException {
+        requireNonNull(nric);
+        String trimmedNric = nric.trim();
+        if (!Nric.isValidNric(trimmedNric)) {
+            throw new IllegalValueException(Nric.MESSAGE_NRIC_CONSTRAINTS);
+        }
+        return new Nric(trimmedNric);
     }
 
-    private static boolean arePrefixesPresent(ArgumentMultimap argumentMultimap, Prefix... prefixes) {
-        return Stream.of(prefixes).allMatch(prefix -> argumentMultimap.getValue(prefix).isPresent());
+    /**
+     * Parses a {@code Optional<String> nric} into an {@code Optional<Nric>} if {@code nric} is present.
+     * See header comment of this class regarding the use of {@code Optional} parameters.
+     */
+    public static Optional<Nric> parseNric(Optional<String> nric) throws IllegalValueException {
+        requireNonNull(nric);
+        return nric.isPresent() ? Optional.of(parseNric(nric.get())) : Optional.empty();
     }
-}
+
 ```
 ###### \java\seedu\address\logic\parser\TagReplaceCommandParser.java
 ``` java
@@ -898,7 +1086,8 @@ public class TagReplaceCommandParser implements Parser<TagReplaceCommand> {
         if (tagList.remove(tagToBeReplaced)) {
             tagList.add(tagToBePlaced);
             Person newPerson = new Person(person.getName(), person.getNric(), tagList, person.getSubjects(),
-                                        person.getRemark());
+                                        person.getRemark(), person.getCca(), person.getInjuriesHistory(),
+                                        person.getNextOfKin());
 
             try {
                 updatePerson(person, newPerson);
@@ -920,6 +1109,8 @@ public class TagReplaceCommandParser implements Parser<TagReplaceCommand> {
      * @param tagSet
      */
     void replaceTag(List<Tag> tagSet);
+
+}
 ```
 ###### \java\seedu\address\model\ModelManager.java
 ``` java
@@ -931,6 +1122,217 @@ public class TagReplaceCommandParser implements Parser<TagReplaceCommand> {
         indicateAddressBookChanged();
     }
 
+```
+###### \java\seedu\address\model\person\Cca.java
+``` java
+
+/**
+ * Represents a remarks of the person in the address book.
+ */
+public class Cca {
+
+    public final String value;
+    public final String pos;
+
+    /**
+     * Constructs a {@code Cca}.
+     *
+     * @param cca A valid cca.
+     * @param pos A valid position.
+     */
+    public Cca(String cca, String pos) {
+        requireNonNull(cca);
+        this.value = cca;
+        requireNonNull(pos);
+        this.pos = pos;
+
+    }
+
+    @Override
+    public String toString() {
+        if (value != "" && pos != "") {
+            return value + ", " + pos;
+        } else {
+            return "";
+        }
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public String getPos() {
+        return pos;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return other == this // short circuit if same object
+                || (other instanceof Cca // instanceof handles nulls
+                && this.value.equals(((Cca) other).value)); // state check
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 17;
+        hash = 37 * hash + value.hashCode();
+        hash = 37 * hash + pos.hashCode();
+        return hash;
+    }
+
+}
+```
+###### \java\seedu\address\model\person\InjuriesHistory.java
+``` java
+
+/**
+ * Represents a remarks of the person in the address book.
+ */
+public class InjuriesHistory {
+
+    public final String value;
+
+    /**
+     * Constructs a {@code InjuriesHistory}.
+     *
+     * @param injurieshistory A valid injurieshistory.
+     */
+    public InjuriesHistory(String injurieshistory) {
+        requireNonNull(injurieshistory);
+        this.value = injurieshistory;
+    }
+
+    @Override
+    public String toString() {
+        return value;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return other == this // short circuit if same object
+                || (other instanceof InjuriesHistory // instanceof handles nulls
+                && this.value.equals(((InjuriesHistory) other).value)); // state check
+    }
+
+    @Override
+    public int hashCode() {
+        return value.hashCode();
+    }
+
+}
+```
+###### \java\seedu\address\model\person\NextOfKin.java
+``` java
+public class NextOfKin {
+
+    public static final String MESSAGE_PHONE_CONSTRAINTS =
+            "Phone numbers can only contain numbers, and should be at least 3 digits long";
+
+    public static final String PHONE_VALIDATION_REGEX = "\\d{3,}";
+
+    public static final String[] REMARK_VALIDATION_REGEX = new String[] {"Father", "Mother", "Guardian"};
+
+    private static  final String SPECIAL_CHARACTERS = "!#$%&'*+/=?`{|}~^.-";
+    public static final String MESSAGE_EMAIL_CONSTRAINTS = "Person emails should be of the format local-part@domain "
+            + "and adhere to the following constraints:\n"
+            + "1. The local-part should only contain alphanumeric characters and these special characters, excluding "
+            + "the parentheses, (" + SPECIAL_CHARACTERS + ") .\n"
+            + "2. This is followed by a '@' and then a domain name. "
+            + "The domain name must:\n"
+            + "    - be at least 2 characters long\n"
+            + "    - start and end with alphanumeric characters\n"
+            + "    - consist of alphanumeric characters, a period or a hyphen for the characters in between, if any.";
+    // alphanumeric and special characters
+
+    private static final String LOCAL_PART_REGEX = "^[\\w" + SPECIAL_CHARACTERS + "]+";
+    private static final String DOMAIN_FIRST_CHARACTER_REGEX = "[^\\W_]"; // alphanumeric characters except underscore
+    private static final String DOMAIN_MIDDLE_REGEX = "[a-zA-Z0-9.-]*"; // alphanumeric, period and hyphen
+    private static final String DOMAIN_LAST_CHARACTER_REGEX = "[^\\W_]$";
+    public static final String EMAIL_VALIDATION_REGEX = LOCAL_PART_REGEX + "@"
+            + DOMAIN_FIRST_CHARACTER_REGEX + DOMAIN_MIDDLE_REGEX + DOMAIN_LAST_CHARACTER_REGEX;
+
+    public static final String MESSAGE_REMARK_CONSTRAINTS =
+            "Remarks for the Next of Kin should be one of the following: "
+                    + (Arrays.deepToString(REMARK_VALIDATION_REGEX) + ".");
+
+
+    public final String fullName;
+    public final String phone;
+    public final String email;
+    public final String remark;
+
+    /**
+     * Constructs a {@code Name}.
+     *
+     * @param name A valid name.
+     */
+
+
+
+    public NextOfKin(String name, String phone, String email, String remark) {
+        requireNonNull(name);
+        this.fullName = name;
+
+        requireNonNull(email);
+        this.email = email;
+
+        requireNonNull(phone);
+        this.phone = phone;
+
+        requireNonNull(remark);
+        this.remark = remark;
+    }
+
+    /**
+     * Returns true if a given string is a valid person name.
+     */
+    public static boolean isValidName(String test) {
+        return test.matches(NAME_VALIDATION_REGEX);
+    }
+
+    /**
+     * Returns true if a given string is a valid email.
+     */
+    public static boolean isValidEmail(String test) {
+        return test.matches(EMAIL_VALIDATION_REGEX);
+    }
+
+    /**
+     * Returns true if a given string is a valid phone number.
+     */
+    public static boolean isValidPhone(String test) {
+        return test.matches(PHONE_VALIDATION_REGEX);
+    }
+
+
+    /**
+     * Returns true if a given string is a valid remark.
+     */
+    public static boolean isValidRemark(String test) {
+        for (String name : REMARK_VALIDATION_REGEX) {
+            if (name.equals(test)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return (fullName + " Phone: " + phone + " Email: " + email + " Remark: " + remark);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return other == this // short circuit if same object
+                || (other instanceof NextOfKin // instanceof handles nulls
+                && this.fullName.equals(((NextOfKin) other).fullName)); // state check
+    }
+
+    @Override
+    public int hashCode() {
+        return fullName.hashCode();
+    }
 ```
 ###### \java\seedu\address\model\person\Nric.java
 ``` java

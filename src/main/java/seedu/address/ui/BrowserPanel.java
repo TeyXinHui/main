@@ -48,6 +48,7 @@ public class BrowserPanel extends UiPart<Region> {
     }
 
     /**
+     * @@author johnnychanjx
     * To load person page according to person name
     */
     public void loadPersonPage(Person person) throws IOException {
@@ -56,7 +57,7 @@ public class BrowserPanel extends UiPart<Region> {
         loadPage("file:" + System.getProperty("user.home") + File.separator + "StudentPage"
                 + File.separator + person.getName() + ".html");
     }
-
+    //@@author johnnychanjx
     public void loadPage(String url) {
         Platform.runLater(() -> browser.getEngine().load(url));
     }
@@ -68,14 +69,14 @@ public class BrowserPanel extends UiPart<Region> {
         URL defaultPage = MainApp.class.getResource(FXML_FILE_FOLDER + DEFAULT_PAGE);
         loadPage(defaultPage.toExternalForm());
     }
+    //@@author
 
     /**
      * Loads the Google Calendar page
      */
-    public void loadCalendarPage() {
-        // String parameter = viewCommand.getParameter();
-        // System.out.println(parameter);
-        loadPage("https://calendar.google.com/calendar/embed?src=edubuddytest%40gmail.com&ctz=Asia%2FSingapore");
+    public void loadCalendarPage(String parameter) {
+        loadPage("https://calendar.google.com/calendar/embed?src=" + parameter
+                + "%40gmail.com&ctz=Asia%2FSingapore");
     }
 
     /**
@@ -94,6 +95,6 @@ public class BrowserPanel extends UiPart<Region> {
     @Subscribe
     private void handleDisplayCalendarEvent(DisplayCalendarRequestEvent event) {
         logger.info(LogsCenter.getEventHandlingLogMessage(event));
-        loadCalendarPage();
+        loadCalendarPage(event.toString());
     }
 }

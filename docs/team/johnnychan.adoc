@@ -9,31 +9,43 @@
 == Overview
 
 EduBuddy is a desktop application designed for secondary school teachers to manage student information better.
-The user interacts with it using a CLI, and it has a GUI created with JavaFX. It is written in Java, and has about 10 kLoC.
+The user interacts with it using a CLI, and it has a GUI created with JavaFX and HTML. It is written in Java, and has about 10 kLoC.
 
 == Summary of contributions
 
-* *Major enhancement*: Add display panel functionalities to the UI window
-** What it does:
-** Justification:
-** Highlights:
-** Credits:
+* *Major enhancement*: Add *HTML student profile page* to *display student information*
+** What it does: Allows the user to view updated student information with HTML page built into the Browser Panel.
+** Justification: This feature improves the product significantly as it allows the user to visualise the student information in a simple and effective way
+** Highlights: This implementation takes in all data from the commands and updates it real time. It uses its own storage method to create and delete user profiles. It incorporates all 4 aspects of the code, Logic (commands), model(User information), UI (Browser Panel), Storage(a separate storage method).
+** Credits: -
 
-* *Minor enhancement*:Integrate data input from user into display window
+* *Minor enhancement*: Added change theme command for Browser Panel. Allows user to view by dark or light mode.
 
 * *Code contributed*: [https://github.com/CS2103JAN2018-T09-B1/main/blob/master/collated/functional/johnnychanjx.md[Functional code]] [https://github.com[Test code]]
 
 * *Other contributions*:
 
-** Project management:
+** Project management: Worked with every release of EduBuddy.
 
 ** Enhancements to existing features:
+ *** Added a different GUI color scheme to match with the EduBuddy UI.
+ *** Created a default page to introduce users to EduBuddy.
+ *** Created official EduBuddy logo.
+ *** Took out case sensitivity in command input.
+
 
 ** Documentation:
+*** Updated User Guide and cleaned up some areas from its original iteration
+*** Updated developer guide and cleaned up areas from its original iteration (eg. Took out Appendix A)
+
 
 ** Community:
+*** Opened, closed, and verified some issues on the issue tracker.
+*** Contributed to forum discussions
 
 ** Tools:
+*** Integrated Travis CI into the project.
+
 
 == Contributions to the User Guide
 
@@ -50,3 +62,5 @@ include::../UserGuide.adoc[tag = theme]
 |===
 
 include::../DeveloperGuide.adoc[tag = browserpanel]
+include::../DeveloperGuide.adoc[tag = theme]
+

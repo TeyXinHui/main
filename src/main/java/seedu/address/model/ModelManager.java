@@ -70,8 +70,9 @@ public class ModelManager extends ComponentManager implements Model {
         this(new AddressBook(), new UserPrefs());
     }
 
-    //@@author johnnychanjx
+
     /**
+     * @@author johnnychanjx
      * @param person
      * @throws IOException
      * Adds a BrowserPanel html Page into StudentPage
@@ -209,9 +210,10 @@ public class ModelManager extends ComponentManager implements Model {
         bw.close();
 
     }
-
+    //@@author
 
     /**
+     * @@author johnnychanjx
      * Deletes BrowserPanel html
      */
     public void deletePage(Person person) {

@@ -9,7 +9,7 @@ import java.util.HashMap;
 import seedu.address.logic.commands.ChangeThemeCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 
-//@@author Johnny Chan
+//@@author johnnychanjx
 /**
  * Parses input arguments and creates a new ChangeThemeCommand object
  */
@@ -49,4 +49,5 @@ public class ChangeThemeCommandParser implements Parser<ChangeThemeCommand> {
 
     }
 }
+//@@author
 

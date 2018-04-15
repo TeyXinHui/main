@@ -4,6 +4,7 @@ package seedu.address.model;
 import java.util.HashMap;
 
 /**
+ * //@@author johnnychanjx
  * Util for Theme Selection
  */
 public class ThemeColourUtil {
